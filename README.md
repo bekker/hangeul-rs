@@ -1,4 +1,7 @@
 # hangeul-rs
+
+[![Build Status](https://travis-ci.org/bekker/hangeul-rs.svg?branch=master)](https://travis-ci.org/bekker/hangeul-rs)
+
 Korean alphabet manipulation library for Rust.
 
 It is lightweight, without any unicode libraries.
