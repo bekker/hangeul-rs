@@ -35,6 +35,9 @@ fn print_choseong(s:&str) {
 }
 ```
 
+## Documentation
+[GitHub Page](https://bekker.github.io/hangeul-rs)
+
 ## Why not 'Hangul'?
 'Hangul' is from old romanization system - McCune–Reischauer system.
 
