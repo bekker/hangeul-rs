@@ -4,4 +4,3 @@ version = "0.1.0"
 authors = ["Jang Ryeol <ryeolj5911@gmail.com>"]
 
 [dependencies]
-unicode_normalization = "0.1.2"
