@@ -1,3 +1,47 @@
+//! Korean alphabet manipulation library for Rust.
+//!
+//! It is lightweight, without any unicode libraries.
+//!
+//! [View on GitHub](https://github.com/bekker/hangeul-rs)
+//!
+//! ```toml
+//! [dependencies]
+//! hangeul = { git = "https://github.com/bekker/hangeul-rs.git" }
+//! ```
+//!
+//! ## Usage
+//!
+//! ```rust
+//! extern crate hangeul;
+//!
+//! fn main() {
+//!     let subjective = "피카츄";
+//!     let sub_josa = match hangeul::ends_with_jongseong(subjective).unwrap() {
+//!         true => "이",
+//!         false => "가"
+//!     };
+//!     let sentence = format!("야생의 {}{} 나타났다!", subjective, sub_josa);
+//!     println!("{}", sentence); // 야생의 피카츄가 나타났다!
+//!     print_choseong(&sentence); // ㅇㅅㅇ ㅍㅋㅊㄱ ㄴㅌㄴㄷ!
+//! }
+//!
+//! fn print_choseong(s:&str) {
+//!     for c in s.chars() {
+//!         print!("{}", hangeul::get_choseong(c).unwrap_or(c));
+//!     }
+//!     print!("\n");
+//! }
+//! ```
+//!
+//! ## Why not 'Hangul'?
+//! 'Hangul' is from old romanization system - McCune–Reischauer system.
+//!
+//! 'Hangeul' is official in South Korea, since 2000
+//!
+//! ## License
+//! Distributed under MIT License
+//!
+
 use std::fmt;
 use std::error;
 
@@ -64,9 +108,7 @@ impl error::Error for HangeulError {
     }
 }
 
-/**
- * These tables are for converting to compatible jamo
- */
+// These tables are for converting to compatible jamo
 const CHOSEONG_TABLE: [u32; 19] = [
     0x01, // ㄱ
     0x02, // ㄲ
@@ -123,9 +165,7 @@ fn _is_syllable(code:u32) -> bool {
     (code >= 0xAC00 && code <= 0xD7AF)
 }
 
-/**
- * Check if the syllable is correct Hangeul syllable
- */
+/// Check if the syllable is correct Hangeul syllable
 pub fn is_syllable(c:char) -> bool {
     let code = c as u32;
     _is_syllable(code)
@@ -140,9 +180,7 @@ fn syllable_to_u32(c:char) -> Result<u32, HangeulError> {
     }
 }
 
-/**
- * Get choseong (top) of the syllable as compatible jamo
- */
+/// Get choseong (top) of the syllable as compatible jamo
 pub fn get_choseong(c:char) -> Result<char, HangeulError> {
     let code = try!(syllable_to_u32(c));
     let x = (code - 0xAC00) / 21 / 28;
@@ -150,17 +188,13 @@ pub fn get_choseong(c:char) -> Result<char, HangeulError> {
     Ok(std::char::from_u32(CHOSEONG_TABLE[x as usize] + 0x3130).unwrap())
 }
 
-/**
- * Get jungseong (middle) of the syllable as compatible jamo
- */
+/// Get jungseong (middle) of the syllable as compatible jamo
 pub fn get_jungseong(c:char) -> Result<char, HangeulError> {
     let code = try!(syllable_to_u32(c));
     Ok(std::char::from_u32(((code - 0xAc00) % (21 * 28)) / 28 + 0x314F).unwrap())
 }
 
-/**
- * Get jongseong (bottom) of the syllable as compatible jamo
- */
+/// Get jongseong (bottom) of the syllable as compatible jamo
 pub fn get_jongseong(c:char) -> Result<char, HangeulError> {
     let code = try!(syllable_to_u32(c));
     // x should be i32, can be negative
@@ -172,17 +206,13 @@ pub fn get_jongseong(c:char) -> Result<char, HangeulError> {
     }
 }
 
-/**
- * Check if the syllable has jongseong (bottom)
- */
+/// Check if the syllable has jongseong (bottom)
 pub fn has_jongseong(c:char) -> Result<bool, HangeulError> {
     let code = try!(syllable_to_u32(c));
     Ok((code - 0xAC00) % 28 != 0)
 }
 
-/**
- * Check if the end syllable of the string has jongseong (bottom)
- */
+/// Check if the end syllable of the string has jongseong (bottom)
 pub fn ends_with_jongseong(s:&str) -> Result<bool, HangeulError> {
     let c = match s.chars().last() {
         Some(x) => x,
@@ -191,33 +221,25 @@ pub fn ends_with_jongseong(s:&str) -> Result<bool, HangeulError> {
     has_jongseong(c)
 }
 
-/**
- * Check if the char is compatible jamo
- */
+/// Check if the char is compatible jamo
 pub fn is_jamo(c:char) -> bool {
     let code = c as u32;
     (code >= 0x3131 && code <= 0x3163)
 }
 
-/**
- * Check if the char is compatible jaeum
- */
+/// Check if the char is compatible jaeum
 pub fn is_jaeum(c:char) -> bool {
     let code = c as u32;
     (code >= 0x3131 && code <= 0x314E)
 }
 
-/**
- * Check if the char is compatible jamo which can be a choseong (top)
- */
+/// Check if the char is compatible jamo which can be a choseong (top)
 pub fn is_choseong(c:char) -> bool {
     let code_jamo = c as u32 - 0x3130;
     CHOSEONG_TABLE.into_iter().any(|&x| x == code_jamo)
 }
 
-/**
- * Check if the char is compatible jamo which can be a jongseong (bottom)
- */
+/// Check if the char is compatible jamo which can be a jongseong (bottom)
 pub fn is_jongseong(c:char) -> bool {
     let code_jamo = c as u32 - 0x3130;
     JONGSEONG_TABLE.into_iter().any(|&x| x == code_jamo)
