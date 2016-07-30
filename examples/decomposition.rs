@@ -8,10 +8,10 @@ fn main() {
     };
     let sentence = format!("야생의 {}{} 나타났다!", subjective, sub_josa);
     println!("{}", sentence); // 야생의 피카츄가 나타났다!
-    print_choseng(&sentence); // ㅇㅅㅇ ㅍㅋㅊㄱ ㄴㅌㄴㄷ!
+    print_choseong(&sentence); // ㅇㅅㅇ ㅍㅋㅊㄱ ㄴㅌㄴㄷ!
 }
 
-fn print_choseng(s:&str) {
+fn print_choseong(s:&str) {
     for c in s.chars() {
         print!("{}", hangeul::get_choseong(c).unwrap_or(c));
     }
