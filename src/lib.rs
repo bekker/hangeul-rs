@@ -1,12 +1,14 @@
+//! [![](http://meritbadge.herokuapp.com/hangeul)](https://crates.io/crates/hangeul)
+//! 
+//! [View on GitHub](https://github.com/bekker/hangeul-rs)
+//!
 //! Korean alphabet manipulation library for Rust.
 //!
 //! It is lightweight, without any unicode libraries.
 //!
-//! [View on GitHub](https://github.com/bekker/hangeul-rs)
-//!
 //! ```toml
 //! [dependencies]
-//! hangeul = { git = "https://github.com/bekker/hangeul-rs.git" }
+//! hangeul = "0.1.0"
 //! ```
 //!
 //! ## Usage

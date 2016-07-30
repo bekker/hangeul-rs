@@ -2,5 +2,14 @@
 name = "hangeul"
 version = "0.1.0"
 authors = ["Jang Ryeol <ryeolj5911@gmail.com>"]
+description = "Korean alphabet manipulation library"
+
+documentation = "https://bekker.github.io/hangeul-rs"
+repository = "https://github.com/bekker/hangeul-rs"
+
+readme = "README.md"
+
+keywords = ["hangul", "hangeul", "korean", "libhangul"]
+license = "MIT"
 
 [dependencies]
