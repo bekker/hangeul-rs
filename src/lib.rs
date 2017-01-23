@@ -74,10 +74,21 @@ mod tests {
         assert_eq!(is_choseong('ㅎ'), true);
         assert_eq!(is_choseong('ㄸ'), true);
         assert_eq!(is_choseong('ㄳ'), false);
+        assert_eq!(is_choseong('ㅉ'), true);
+        assert_eq!(is_choseong('ㅃ'), true);
+        assert_eq!(is_choseong('ㅄ'), false);
+        assert_eq!(is_choseong('\u{3130}'), false);
+        assert_eq!(is_choseong('\u{314F}'), false);
         assert_eq!(is_jongseong('ㄱ'), true);
         assert_eq!(is_jongseong('ㅎ'), true);
         assert_eq!(is_jongseong('ㄸ'), false);
         assert_eq!(is_jongseong('ㄳ'), true);
+        assert_eq!(is_jongseong('ㅉ'), false);
+        assert_eq!(is_jongseong('ㅃ'), false);
+        assert_eq!(is_jongseong('ㅄ'), true);
+        assert_eq!(is_jongseong('A'), false);
+        assert_eq!(is_jongseong('\u{3130}'), false);
+        assert_eq!(is_jongseong('\u{314F}'), false);
     }
 }
 
@@ -109,6 +120,72 @@ impl error::Error for HangeulError {
         }
     }
 }
+
+const IS_CHOSEONG: [bool; 30] = [
+    true,  // ㄱ 0x3131
+    true,  // ㄲ
+    false, // ㄳ
+    true,  // ㄴ
+    false, // ㄵ
+    false, // ㄶ
+    true,  // ㄷ
+    true,  // ㄸ
+    true,  // ㄹ
+    false, // ㄺ
+    false, // ㄻ
+    false, // ㄼ
+    false, // ㄽ
+    false, // ㄾ
+    false, // ㄿ
+    false, // ㅀ
+    true,  // ㅁ
+    true,  // ㅂ
+    true,  // ㅃ
+    false, // ㅄ
+    true,  // ㅅ
+    true,  // ㅆ
+    true,  // ㅇ
+    true,  // ㅈ
+    true,  // ㅉ
+    true,  // ㅊ
+    true,  // ㅋ
+    true,  // ㅌ
+    true,  // ㅍ
+    true,  // ㅎ 0x314E
+];
+
+const IS_JONGSEONG: [bool; 30] = [
+    true,  // ㄱ 0x3131
+    true,  // ㄲ
+    true,  // ㄳ
+    true,  // ㄴ
+    true,  // ㄵ
+    true,  // ㄶ
+    true,  // ㄷ
+    false, // ㄸ
+    true,  // ㄹ
+    true,  // ㄺ
+    true,  // ㄻ
+    true,  // ㄼ
+    true,  // ㄽ
+    true,  // ㄾ
+    true,  // ㄿ
+    true,  // ㅀ
+    true,  // ㅁ
+    true,  // ㅂ
+    false, // ㅃ
+    true,  // ㅄ
+    true,  // ㅅ
+    true,  // ㅆ
+    true,  // ㅇ
+    true,  // ㅈ
+    false, // ㅉ
+    true,  // ㅊ
+    true,  // ㅋ
+    true,  // ㅌ
+    true,  // ㅍ
+    true,  // ㅎ 0x314E
+];
 
 // These tables are for converting to compatible jamo
 const CHOSEONG_TABLE: [u32; 19] = [
@@ -229,20 +306,24 @@ pub fn is_jamo(c:char) -> bool {
     (code >= 0x3131 && code <= 0x3163)
 }
 
+fn _is_jaeum(code:u32) -> bool {
+    (code >= 0x3131 && code <= 0x314E)
+}
+
 /// Check if the char is compatible jaeum
 pub fn is_jaeum(c:char) -> bool {
     let code = c as u32;
-    (code >= 0x3131 && code <= 0x314E)
+    _is_jaeum(code)
 }
 
 /// Check if the char is compatible jamo which can be a choseong (top)
 pub fn is_choseong(c:char) -> bool {
-    let code_jamo = c as u32 - 0x3130;
-    CHOSEONG_TABLE.into_iter().any(|&x| x == code_jamo)
+    let code = c as u32;
+    _is_jaeum(code) && IS_CHOSEONG[(code - 0x3131) as usize]
 }
 
 /// Check if the char is compatible jamo which can be a jongseong (bottom)
 pub fn is_jongseong(c:char) -> bool {
-    let code_jamo = c as u32 - 0x3130;
-    JONGSEONG_TABLE.into_iter().any(|&x| x == code_jamo)
+    let code = c as u32;
+    _is_jaeum(code) && IS_JONGSEONG[(code - 0x3131) as usize]
 }

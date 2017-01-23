@@ -10,7 +10,7 @@ It is lightweight, without any unicode libraries.
 
 ```toml
 [dependencies]
-hangeul = "0.1.0"
+hangeul = "0.1.1"
 ```
 
 ## Usage
@@ -38,7 +38,7 @@ fn print_choseong(s:&str) {
 ```
 
 ## Documentation
-[GitHub Page](https://bekker.github.io/hangeul-rs)
+[Docs.rs](https://docs.rs/hangeul/)
 
 ## Why not 'Hangul'?
 'Hangul' is from old romanization system - McCune–Reischauer system.
