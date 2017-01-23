@@ -10,7 +10,7 @@ It is lightweight, without any unicode libraries.
 
 ```toml
 [dependencies]
-hangeul = "0.1.1"
+hangeul = "0.1.2"
 ```
 
 ## Usage

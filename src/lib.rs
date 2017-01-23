@@ -8,7 +8,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! hangeul = "0.1.1"
+//! hangeul = "0.1.2"
 //! ```
 //!
 //! ## Usage
@@ -366,6 +366,7 @@ fn _is_moeum(code:u32) -> bool {
     (code >= MOEUM_START && code <= MOEUM_END)
 }
 
+/// Check if the char is compatible moeum
 pub fn is_moeum(c:char) -> bool {
     let code = c as u32;
     _is_moeum(code)
@@ -391,6 +392,7 @@ pub fn is_jongseong(c:char) -> bool {
     _is_jongseong(code)
 }
 
+/// Decompose a Hangeul syllable into compatible jamos
 pub fn decompose(c:char) -> Result<(char, char, Option<char>), HangeulError> {
     let cho = try!(get_choseong(c));
     let jung = try!(get_jungseong(c));
@@ -398,6 +400,7 @@ pub fn decompose(c:char) -> Result<(char, char, Option<char>), HangeulError> {
     Ok((cho, jung, jong))
 }
 
+/// Compose compatible jamos into a Hangeul syllable
 pub fn compose(choseong:char, jungseong:char, jongseong:Option<char>) -> Result<char, HangeulError> {
     let cho_code = choseong as u32;
     let jung_code = jungseong as u32;

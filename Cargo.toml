@@ -1,10 +1,10 @@
 [package]
 name = "hangeul"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Jang Ryeol <ryeolj5911@gmail.com>"]
 description = "Korean alphabet manipulation library"
 
-documentation = "https://bekker.github.io/hangeul-rs"
+documentation = "https://docs.rs/hangeul"
 repository = "https://github.com/bekker/hangeul-rs"
 
 readme = "README.md"
