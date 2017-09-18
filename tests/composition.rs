@@ -1,31 +1,5 @@
-use super::*;
-use super::JAMO_TO_CHOSEONG;
-use super::JAMO_TO_JONGSEONG;
-use super::CHOSEONG_TO_JAMO;
-use super::JONGSEONG_TO_JAMO;
-
-#[test]
-fn jamo_table_test() {
-    for x in 0..JAMO_TO_CHOSEONG.len() {
-        let choseong_index = JAMO_TO_CHOSEONG[x];
-        if choseong_index == -1 {
-            continue;
-        }
-
-        let jamo_index = CHOSEONG_TO_JAMO[choseong_index as usize] as usize;
-        assert_eq!(jamo_index, x);
-    }
-
-    for x in 0..JAMO_TO_JONGSEONG.len() {
-        let jongseong_index = JAMO_TO_JONGSEONG[x];
-        if jongseong_index == -1 {
-            continue;
-        }
-
-        let jamo_index = JONGSEONG_TO_JAMO[jongseong_index as usize] as usize;
-        assert_eq!(jamo_index, x);
-    }
-}
+extern crate hangeul;
+use hangeul::*;
 
 #[test]
 fn decomposition_test() {
@@ -69,7 +43,7 @@ fn check_jamo_test() {
 }
 
 #[test]
-fn compose_test() {
+fn composition_test() {
     assert_eq!(compose('ㄱ', 'ㅏ', None).unwrap(), '가');
     assert_eq!(compose('ㄱ', 'ㅏ', Some('ㄱ')).unwrap(), '각');
     assert_eq!(compose('ㄱ', 'ㅏ', Some('ㅄ')).unwrap(), '값');

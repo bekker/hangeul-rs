@@ -8,7 +8,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! hangeul = "0.1.2"
+//! hangeul = "0.1.3"
 //! ```
 //!
 //! ## Usage
@@ -48,7 +48,35 @@ use std::fmt;
 use std::error;
 
 #[cfg(test)]
-mod test;
+mod tests {
+    use super::JAMO_TO_CHOSEONG;
+    use super::JAMO_TO_JONGSEONG;
+    use super::CHOSEONG_TO_JAMO;
+    use super::JONGSEONG_TO_JAMO;
+
+    #[test]
+    fn jamo_table_test() {
+        for x in 0..JAMO_TO_CHOSEONG.len() {
+            let choseong_index = JAMO_TO_CHOSEONG[x];
+            if choseong_index == -1 {
+                continue;
+            }
+
+            let jamo_index = CHOSEONG_TO_JAMO[choseong_index as usize] as usize;
+            assert_eq!(jamo_index, x);
+        }
+
+        for x in 0..JAMO_TO_JONGSEONG.len() {
+            let jongseong_index = JAMO_TO_JONGSEONG[x];
+            if jongseong_index == -1 {
+                continue;
+            }
+
+            let jamo_index = JONGSEONG_TO_JAMO[jongseong_index as usize] as usize;
+            assert_eq!(jamo_index, x);
+        }
+    }
+}
 
 #[derive(Debug)]
 pub enum HangeulError {
