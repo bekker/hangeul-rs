@@ -48,86 +48,7 @@ use std::fmt;
 use std::error;
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    use super::JAMO_TO_CHOSEONG;
-    use super::JAMO_TO_JONGSEONG;
-    use super::CHOSEONG_TO_JAMO;
-    use super::JONGSEONG_TO_JAMO;
-
-    #[test]
-    fn jamo_table_test() {
-        for x in 0..JAMO_TO_CHOSEONG.len() {
-            let choseong_index = JAMO_TO_CHOSEONG[x];
-            if choseong_index == -1 {
-                continue;
-            }
-
-            let jamo_index = CHOSEONG_TO_JAMO[choseong_index as usize] as usize;
-            assert_eq!(jamo_index, x);
-        }
-
-        for x in 0..JAMO_TO_JONGSEONG.len() {
-            let jongseong_index = JAMO_TO_JONGSEONG[x];
-            if jongseong_index == -1 {
-                continue;
-            }
-
-            let jamo_index = JONGSEONG_TO_JAMO[jongseong_index as usize] as usize;
-            assert_eq!(jamo_index, x);
-        }
-    }
-
-    #[test]
-    fn decomposition_test() {
-        let han = '한';
-        let ha = '하';
-        assert_eq!(get_choseong(han).unwrap(), 'ㅎ');
-        assert_eq!(get_jungseong(han).unwrap(), 'ㅏ');
-        assert_eq!(get_jongseong(han).unwrap().unwrap(), 'ㄴ');
-        assert_eq!(has_jongseong(han).unwrap(), true);
-        assert_eq!(has_jongseong(ha).unwrap(), false);
-        assert_eq!(get_jongseong(ha).unwrap(), None);
-    }
-
-    #[test]
-    fn check_jamo_test() {
-        assert_eq!(is_jamo('ㄱ'), true);
-        assert_eq!(is_jamo('ㅣ'), true);
-        assert_eq!(is_jamo('a'), false);
-        assert_eq!(is_jaeum('ㄱ'), true);
-        assert_eq!(is_jaeum('ㅎ'), true);
-        assert_eq!(is_jaeum('ㅏ'), false);
-        assert_eq!(is_choseong('ㄱ'), true);
-        assert_eq!(is_choseong('ㅎ'), true);
-        assert_eq!(is_choseong('ㄸ'), true);
-        assert_eq!(is_choseong('ㄳ'), false);
-        assert_eq!(is_choseong('ㅉ'), true);
-        assert_eq!(is_choseong('ㅃ'), true);
-        assert_eq!(is_choseong('ㅄ'), false);
-        assert_eq!(is_choseong('\u{3130}'), false);
-        assert_eq!(is_choseong('\u{314F}'), false);
-        assert_eq!(is_jongseong('ㄱ'), true);
-        assert_eq!(is_jongseong('ㅎ'), true);
-        assert_eq!(is_jongseong('ㄸ'), false);
-        assert_eq!(is_jongseong('ㄳ'), true);
-        assert_eq!(is_jongseong('ㅉ'), false);
-        assert_eq!(is_jongseong('ㅃ'), false);
-        assert_eq!(is_jongseong('ㅄ'), true);
-        assert_eq!(is_jongseong('A'), false);
-        assert_eq!(is_jongseong('\u{3130}'), false);
-        assert_eq!(is_jongseong('\u{314F}'), false);
-    }
-
-    #[test]
-    fn compose_test() {
-        assert_eq!(compose('ㄱ', 'ㅏ', None).unwrap(), '가');
-        assert_eq!(compose('ㄱ', 'ㅏ', Some('ㄱ')).unwrap(), '각');
-        assert_eq!(compose('ㄱ', 'ㅏ', Some('ㅄ')).unwrap(), '값');
-        assert_eq!(compose('ㅎ', 'ㅘ', Some('ㅎ')).unwrap(), '홯');
-        compose('ㄳ', 'ㅏ', None).unwrap_err();
-    }
-}
+mod test;
 
 #[derive(Debug)]
 pub enum HangeulError {
@@ -312,11 +233,17 @@ pub fn get_choseong(c:char) -> Result<char, HangeulError> {
     std::char::from_u32(CHOSEONG_TO_JAMO[x as usize] + JAMO_START).ok_or(HangeulError::NotSyllable)
 }
 
+/// Alias for get_choseong
+pub use self::get_choseong as get_top;
+
 /// Get jungseong (middle) of the syllable as compatible jamo
 pub fn get_jungseong(c:char) -> Result<char, HangeulError> {
     let code = try!(syllable_to_u32(c));
     std::char::from_u32(((code - SYLLABLE_START) % (21 * 28)) / 28 + MOEUM_START).ok_or(HangeulError::NotSyllable)
 }
+
+/// Alias for get_jungseong
+pub use self::get_jungseong as get_middle;
 
 /// Get jongseong (bottom) of the syllable as compatible jamo
 pub fn get_jongseong(c:char) -> Result<Option<char>, HangeulError> {
@@ -331,11 +258,17 @@ pub fn get_jongseong(c:char) -> Result<Option<char>, HangeulError> {
     }
 }
 
+/// Alias for get_jongseong
+pub use self::get_jongseong as get_bottom;
+
 /// Check if the syllable has jongseong (bottom)
 pub fn has_jongseong(c:char) -> Result<bool, HangeulError> {
     let code = try!(syllable_to_u32(c));
     Ok((code - SYLLABLE_START) % 28 != 0)
 }
+
+/// Alias for has_jongseong
+pub use self::has_jongseong as has_bottom;
 
 /// Check if the end syllable of the string has jongseong (bottom)
 pub fn ends_with_jongseong(s:&str) -> Result<bool, HangeulError> {
@@ -345,6 +278,9 @@ pub fn ends_with_jongseong(s:&str) -> Result<bool, HangeulError> {
     };
     has_jongseong(c)
 }
+
+/// Alias for ends_with_jongseong
+pub use self::ends_with_jongseong as ends_with_bottom;
 
 /// Check if the char is compatible jamo
 pub fn is_jamo(c:char) -> bool {
@@ -362,6 +298,9 @@ pub fn is_jaeum(c:char) -> bool {
     _is_jaeum(code)
 }
 
+/// Alias for is_jaeum
+pub use self::is_jaeum as is_consonant;
+
 fn _is_moeum(code:u32) -> bool {
     (code >= MOEUM_START && code <= MOEUM_END)
 }
@@ -371,6 +310,9 @@ pub fn is_moeum(c:char) -> bool {
     let code = c as u32;
     _is_moeum(code)
 }
+
+/// Alias for is_moeum
+pub use self::is_moeum as is_vowel;
 
 fn _is_choseong(code:u32) -> bool {
     _is_jaeum(code) && (JAMO_TO_CHOSEONG[(code - JAEUM_START) as usize] != -1)
@@ -382,6 +324,9 @@ pub fn is_choseong(c:char) -> bool {
     _is_choseong(code)
 }
 
+/// Alias for is_choseong
+pub use self::is_choseong as is_top;
+
 fn _is_jongseong(code:u32) -> bool {
     _is_jaeum(code) && (JAMO_TO_JONGSEONG[(code - JAEUM_START) as usize] != -1)
 }
@@ -391,6 +336,9 @@ pub fn is_jongseong(c:char) -> bool {
     let code = c as u32;
     _is_jongseong(code)
 }
+
+/// Alias for is_jongseong
+pub use self::is_jongseong as is_bottom;
 
 /// Decompose a Hangeul syllable into compatible jamos
 pub fn decompose(c:char) -> Result<(char, char, Option<char>), HangeulError> {

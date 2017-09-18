@@ -1,6 +1,6 @@
 [package]
 name = "hangeul"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Jang Ryeol <ryeolj5911@gmail.com>"]
 description = "Korean alphabet manipulation library"
 
