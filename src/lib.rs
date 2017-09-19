@@ -6,6 +6,8 @@
 //!
 //! It is lightweight, without any unicode libraries.
 //!
+//! Supports only modern korean alphabets.
+//!
 //! ```toml
 //! [dependencies]
 //! hangeul = "0.1.3"
