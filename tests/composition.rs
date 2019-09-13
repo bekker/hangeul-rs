@@ -2,65 +2,103 @@ extern crate hangeul;
 use hangeul::*;
 
 #[test]
-fn decomposition_test() {
+fn check_decompose() {
+    assert_eq!(
+        vec![
+            Ok(('ㄷ','ㅐ', None)),
+            Ok(('ㅎ','ㅏ', Some('ㄴ'))),
+            Ok(('ㅁ', 'ㅣ', Some('ㄴ'))),
+            Ok(('ㄱ','ㅜ', Some('ㄱ'))),
+        ],
+        decompose("대한민국")
+    );
+}
+
+#[test]
+fn check_decompose_char() {
     let han = '한';
     let ha = '하';
-    assert_eq!(get_choseong(han).unwrap(), 'ㅎ');
-    assert_eq!(get_jungseong(han).unwrap(), 'ㅏ');
-    assert_eq!(get_jongseong(han).unwrap().unwrap(), 'ㄴ');
-    assert_eq!(has_jongseong(han).unwrap(), true);
-    assert_eq!(has_jongseong(ha).unwrap(), false);
-    assert_eq!(get_jongseong(ha).unwrap(), None);
+
+    assert_eq!(
+        Ok(('ㅎ','ㅏ', Some('ㄴ'))),
+        decompose_char(&'한')
+    );
+
+    assert_eq!(
+        Ok(('ㅎ','ㅏ', None)),
+        decompose_char(&'하')
+    );
 }
 
 #[test]
-fn check_jamo_test() {
-    assert_eq!(is_jamo('ㄱ'), true);
-    assert_eq!(is_jamo('ㅣ'), true);
-    assert_eq!(is_jamo('a'), false);
-    assert_eq!(is_jaeum('ㄱ'), true);
-    assert_eq!(is_jaeum('ㅎ'), true);
-    assert_eq!(is_jaeum('ㅏ'), false);
-    assert_eq!(is_choseong('ㄱ'), true);
-    assert_eq!(is_choseong('ㅎ'), true);
-    assert_eq!(is_choseong('ㄸ'), true);
-    assert_eq!(is_choseong('ㄳ'), false);
-    assert_eq!(is_choseong('ㅉ'), true);
-    assert_eq!(is_choseong('ㅃ'), true);
-    assert_eq!(is_choseong('ㅄ'), false);
-    assert_eq!(is_choseong('\u{3130}'), false);
-    assert_eq!(is_choseong('\u{314F}'), false);
-    assert_eq!(is_jongseong('ㄱ'), true);
-    assert_eq!(is_jongseong('ㅎ'), true);
-    assert_eq!(is_jongseong('ㄸ'), false);
-    assert_eq!(is_jongseong('ㄳ'), true);
-    assert_eq!(is_jongseong('ㅉ'), false);
-    assert_eq!(is_jongseong('ㅃ'), false);
-    assert_eq!(is_jongseong('ㅄ'), true);
-    assert_eq!(is_jongseong('A'), false);
-    assert_eq!(is_jongseong('\u{3130}'), false);
-    assert_eq!(is_jongseong('\u{314F}'), false);
+fn check_jamo() {
+    assert_eq!(is_jamo('\u{1100}' as u32), true);
+    assert_eq!(is_compat_jamo('ㄱ' as u32), true);
+    assert_eq!(is_jamo('\u{1175}' as u32), true);
+    assert_eq!(is_compat_jamo('ㅣ' as u32), true);
+    assert_eq!(is_jamo('a' as u32), false);
 }
 
 #[test]
-fn composition_test() {
-    assert_eq!(compose('ㄱ', 'ㅏ', None).unwrap(), '가');
-    assert_eq!(compose('ㄱ', 'ㅏ', Some('ㄱ')).unwrap(), '각');
-    assert_eq!(compose('ㄱ', 'ㅏ', Some('ㅄ')).unwrap(), '값');
-    assert_eq!(compose('ㅎ', 'ㅘ', Some('ㅎ')).unwrap(), '홯');
-    compose('ㄳ', 'ㅏ', None).unwrap_err();
+fn check_jaeum() {
+    assert_eq!(is_jaeum('ㄱ' as u32), true);
+    assert_eq!(is_jaeum('ㅎ' as u32), true);
+    assert_eq!(is_jaeum('ㅏ' as u32), false);
 }
 
 #[test]
-fn alias_test() {
-    assert_eq!(is_top('ㄱ'), true);
-    assert_eq!(is_bottom('ㄳ'), true);
-    assert_eq!(has_bottom('감').unwrap(), true);
-    assert_eq!(ends_with_bottom(&"감감").unwrap(), true);
-    assert_eq!(is_consonant('ㄱ'), true);
-    assert_eq!(is_vowel('ㅏ'), true);
+fn check_choseong() {
+    assert_eq!(is_choseong('ㄱ' as u32), true);
+    assert_eq!(is_choseong('ㅎ' as u32), true);
+    assert_eq!(is_choseong('ㄸ' as u32), true);
+    assert_eq!(is_choseong('ㄳ' as u32), false);
+    assert_eq!(is_choseong('ㅉ' as u32), true);
+    assert_eq!(is_choseong('ㅃ' as u32), true);
+    assert_eq!(is_choseong('ㅄ' as u32), false);
+    assert_eq!(is_choseong('\u{3130}' as u32), false);
+    assert_eq!(is_choseong('\u{314F}' as u32), false);
+}
+
+#[test]
+fn check_jungseong() {
+    assert_eq!(is_jungseong('ㅏ' as u32), true);
+    assert_eq!(is_jungseong('ㅗ' as u32), true);
+    assert_eq!(is_jungseong('ㅂ' as u32), false);
+    assert_eq!(is_jungseong('z' as u32), false);
+    assert_eq!(is_jungseong('ㄳ' as u32), false);
+}
+
+#[test]
+fn check_jongseong() {
+    assert_eq!(is_jongseong('ㄱ' as u32), true);
+    assert_eq!(is_jongseong('ㅎ' as u32), true);
+    assert_eq!(is_jongseong('ㄸ' as u32), false);
+    assert_eq!(is_jongseong('ㄳ' as u32), true);
+    assert_eq!(is_jongseong('ㅉ' as u32), false);
+    assert_eq!(is_jongseong('ㅃ' as u32), false);
+    assert_eq!(is_jongseong('ㅄ' as u32), true);
+    assert_eq!(is_jongseong('A' as u32), false);
+    assert_eq!(is_jongseong('\u{3130}' as u32), false);
+    assert_eq!(is_jongseong('\u{314F}' as u32), false);
+}
+
+#[test]
+fn check_vowel_consonant() {
+    assert_eq!(is_consonant('ㄱ' as u32), true);
+    assert_eq!(is_consonant('ㅐ' as u32), false);
+    assert_eq!(is_consonant('가' as u32), false);
+    assert_eq!(is_vowel('ㅏ' as u32), true);
+    assert_eq!(is_vowel('ㅁ' as u32), false);
+    assert_eq!(is_vowel('오' as u32), false);
+}
+
+#[test]
+fn check_position() {
+    assert_eq!(is_jongseong('ㄳ' as u32), true);
+    assert_eq!(has_jongseong(&'감'), Ok(true));
+
     let gam = '감';
-    assert_eq!(get_top(gam).unwrap(), 'ㄱ');
-    assert_eq!(get_middle(gam).unwrap(), 'ㅏ');
-    assert_eq!(get_bottom(gam).unwrap().unwrap(), 'ㅁ');
+    assert_eq!(get_lead(&gam).unwrap(), 'ㄱ');
+    assert_eq!(get_middle(&gam).unwrap(), 'ㅏ');
+    assert_eq!(get_tail(&gam).unwrap(), 'ㅁ');
 }
