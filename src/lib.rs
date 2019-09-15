@@ -73,14 +73,22 @@ pub fn is_moeum(code: u32) -> bool {
 /// Alias for is_moeum.
 pub use self::is_moeum as is_vowel;
 
-/// Returns true from 0x1100 to 0x11FF.
-/// See https://en.wikipedia.org/wiki/Hangul_Jamo_(Unicode_block).
+/// Returns true from `0x1100` to `0x11FF`.
+/// See [Hangeul Jamo](https://en.wikipedia.org/wiki/Hangul_Jamo_(Unicode_block)).
+///
+/// ```rust
+/// use hangeul::is_jamo;
+///
+/// assert_eq!(true, is_jamo('ᅡ' as u32)); // 0x1161
+/// assert_eq!(false, is_jamo('ㅏ' as u32)); // 0x314F
+/// assert_eq!(false, is_jamo('한' as u32));
+/// ```
 pub fn is_jamo(code: u32) -> bool {
     (code >= JAMO_START && code <= JAMO_END)
 }
 
-/// Returns true from 0x3131 to 0x318E.
-/// See https://en.wikipedia.org/wiki/Hangul_Compatibility_Jamo.
+/// Returns true from `0x3131` to `0x318E`.
+/// See [Compatibility Jamo](https://en.wikipedia.org/wiki/Hangul_Compatibility_Jamo).
 pub fn is_compat_jamo(code: u32) -> bool {
     (code >= COMPAT_JAMO_START && code <= COMPAT_JAMO_END)
 }
@@ -112,7 +120,19 @@ pub fn is_hangeul(code: u32) -> bool {
     return false;
 }
 
-fn to_hangeul_u32(c: &char) -> Result<u32> {
+/// Casts a char to u32. Errors if said u32 falls outside of the Hangeul Syllable unicode range.
+/// See `is_hangeul`.
+///
+/// ```rust
+/// use hangeul::to_hangeul_u32;
+/// use hangeul::errors::HangeulError;
+///
+/// assert_eq!(Ok(0xB242), to_hangeul_u32(&'뉂'));
+/// assert_eq!(Ok(0xBDC6), to_hangeul_u32(&'뷆'));
+/// assert_eq!(Err(HangeulError::NotASyllable), to_hangeul_u32(&'ㅏ'));
+/// assert_eq!(Err(HangeulError::NotASyllable), to_hangeul_u32(&'何'));
+/// ```
+pub fn to_hangeul_u32(c: &char) -> Result<u32> {
     let code = *c as u32;
 
     match is_syllable(code) {
@@ -122,7 +142,16 @@ fn to_hangeul_u32(c: &char) -> Result<u32> {
 }
 
 /// Wrapper around `Choseong` to get the first/lead character from a Hangeul syllable.
-/// See models::Choseong for more options for deconstruction.
+/// See models::Choseong.
+///
+/// ```rust
+/// use hangeul::get_choseong; // get_lead
+/// use hangeul::errors::HangeulError;
+/// use hangeul::models::Choseong;
+///
+/// assert_eq!(Ok('ㄱ'), get_choseong(&'갅'));
+/// assert_eq!(Err(HangeulError::JamoNotFound), get_choseong(&'ㅏ'));
+/// ```
 pub fn get_choseong(c: &char) -> Result<char> {
     match Choseong::from_char(c) {
         Some(cho) => Ok(cho.to_char()),
@@ -133,7 +162,16 @@ pub fn get_choseong(c: &char) -> Result<char> {
 pub use self::get_choseong as get_lead;
 
 /// Wrapper around `Jungseong` to get the middle/vowel character from a Hangeul syllable.
-/// See models::Jungseong for more options for deconstruction.
+/// See models::Jungseong.
+///
+/// ```rust
+/// use hangeul::get_jungseong; // get_middle
+/// use hangeul::errors::HangeulError;
+/// use hangeul::models::Jungseong;
+///
+/// assert_eq!(Ok('ㅏ'), get_jungseong(&'갅'));
+/// assert_eq!(Err(HangeulError::JamoNotFound), get_jungseong(&'ㄱ'));
+/// ```
 pub fn get_jungseong(c: &char) -> Result<char> {
     match Jungseong::from_char(c) {
         Some(jung) => Ok(jung.to_char()),
@@ -144,7 +182,16 @@ pub fn get_jungseong(c: &char) -> Result<char> {
 pub use self::get_jungseong as get_middle;
 
 /// Wrapper around `Jongseong` to get the bottom/tail character from a Hangeul syllable.
-/// See models::Jongseong for more options for deconstruction.
+/// See models::Jongseong.
+///
+/// ```rust
+/// use hangeul::get_jongseong; // get_tail
+/// use hangeul::errors::HangeulError;
+/// use hangeul::models::Jongseong;
+///
+/// assert_eq!(Ok('ㄵ'), get_jongseong(&'갅'));
+/// assert_eq!(Err(HangeulError::JamoNotFound), get_jongseong(&'ㅏ'));
+/// ```
 pub fn get_jongseong(c: &char) -> Result<char> {
     match Jongseong::from_char(c) {
         Some(jong) => Ok(jong.to_char()),
@@ -155,6 +202,15 @@ pub fn get_jongseong(c: &char) -> Result<char> {
 pub use self::get_jongseong as get_tail;
 
 /// Check if the syllable has a tail, or jongseong (종성).
+/// use hangeul::has_jongseong; // has_jongseong
+/// ```rust
+/// use hangeul::has_jongseong;
+/// use hangeul::errors::HangeulError;
+///
+/// assert_eq!(Ok(true), has_jongseong(&'갅'));
+/// assert_eq!(Ok(false), has_jongseong(&'가'));
+/// assert_eq!(Err(HangeulError::NotASyllable), has_jongseong(&'b'));
+/// ```
 pub fn has_jongseong(c: &char) -> Result<bool> {
     let code = to_hangeul_u32(c)?;
 
@@ -163,23 +219,57 @@ pub fn has_jongseong(c: &char) -> Result<bool> {
 /// Alias for has_jongseong.
 pub use self::has_jongseong as has_tail;
 
+/// Checks if a char is a lead jamo, or choseong (중성).
+///
+/// ```rust
+/// use hangeul::is_choseong; //is_lead
+///
+/// assert_eq!(true, is_choseong('ㅉ' as u32));
+/// assert_eq!(false, is_choseong('ㅏ' as u32));
+/// assert_eq!(false, is_choseong('ㄵ' as u32));
+/// ```
 pub fn is_choseong(code: u32) -> bool {
     Choseong::from_u32(code).is_some()
 }
 /// Alias for is_choseong.
 pub use self::is_choseong as is_lead;
 
+/// Checks if a char is a middle/vowel jamo, or jungseong (중성).
+///
+/// ```rust
+/// use hangeul::is_jungseong; //is_vowel
+///
+/// assert_eq!(false, is_jungseong('ㅉ' as u32));
+/// assert_eq!(true, is_jungseong('ㅏ' as u32));
+/// assert_eq!(false, is_jungseong('ㄵ' as u32));
+/// ```
 pub fn is_jungseong(code: u32) -> bool {
     Jungseong::from_u32(code).is_some()
 }
 
+/// Checks if a char is a tail jamo, or jongseong (종성).
+///
+/// ```rust
+/// use hangeul::is_jongseong; //is_tail
+///
+/// assert_eq!(false, is_jongseong('ㅉ' as u32));
+/// assert_eq!(false, is_jongseong('ㅏ' as u32));
+/// assert_eq!(true, is_jongseong('ㄵ' as u32));
+/// ```
 pub fn is_jongseong(code: u32) -> bool {
     Jongseong::from_u32(code).is_some()
 }
 /// Alias for is_choseong.
 pub use self::is_jongseong as is_tail;
 
-/// Checks if a str ends in a consonant or not.
+/// Checks if a str's last char ends in a consonant or not.
+///
+/// ```rust
+/// use hangeul::ends_with_jongseong; // ends_with_consonant
+///
+/// assert_eq!(Ok(false), ends_with_jongseong("피카츄"));
+/// assert_eq!(Ok(true), ends_with_jongseong("이상해꽃"));
+/// ```
 pub fn ends_with_jongseong(content: &str) -> Result<bool> {
     let c = match content.chars().last() {
         Some(x) => x,

@@ -7,7 +7,7 @@ pub trait Syllable {
     fn to_u32(&self) -> u32;
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Choseong {
     Giyeok,
     SsangGiyeok,
@@ -192,7 +192,7 @@ impl Syllable for Choseong {
 }
 
 /// `중성` -> Middle Sound (always a vowel)
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Jungseong {
     A,   // ㅏ
     AE,  // ㅐ
@@ -391,7 +391,7 @@ impl Syllable for Jungseong {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Jongseong {
     Giyeok,
     SsangGiyeok,
