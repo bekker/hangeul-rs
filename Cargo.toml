@@ -1,6 +1,6 @@
 [package]
 name = "hangeul"
-version = "0.2.0-alpha"
+version = "0.2.0"
 authors = [
   "Jang Ryeol <ryeolj5911@gmail.com>",
   "Andrew Zah <zah@andrewzah.com>"

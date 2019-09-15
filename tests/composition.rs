@@ -16,9 +16,6 @@ fn check_decompose() {
 
 #[test]
 fn check_decompose_char() {
-    let han = '한';
-    let ha = '하';
-
     assert_eq!(
         Ok(('ㅎ','ㅏ', Some('ㄴ'))),
         decompose_char(&'한')
