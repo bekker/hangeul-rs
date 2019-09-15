@@ -31,13 +31,22 @@ const JONGSEONG_END: u32 = 0x11C2;
 const COMPAT_JONGSEONG_START: u32 = 0x3165;
 const COMPAT_JONGSEONG_END: u32 = 0x318E;
 
-/// Check if the syllable is finished Hangeul syllable.
-/// 0xAC00 to 0xD7A3
+/// Check if the u32 is a finished/composed Hangeul syllable.
+/// Returns true for the `0xAC00` to `0xD7A3` range.
+///
+/// ```rust
+/// use hangeul::is_syllable;
+///
+/// assert_eq!(true, is_syllable('한' as u32));
+/// assert_eq!(false, is_syllable('ㄱ' as u32));
+/// assert_eq!(false, is_syllable('ㅏ' as u32));
+/// ```
 pub fn is_syllable(code: u32) -> bool {
     (code >= SYLLABLE_START && code <= SYLLABLE_END)
 }
 
-/// Checks if the character is a consonant, or jaeum (자음).
+/// Checks if the u32 is a consonant, or jaeum (자음).
+/// Checks both Jamo and Compatibility Jamo unicode blocks.
 pub fn is_jaeum(code: u32) -> bool {
     (code >= COMPAT_CHOSEONG_START && code <= COMPAT_CHOSEONG_END)
     || (code >= COMPAT_JONGSEONG_START && code <= COMPAT_JONGSEONG_END)
@@ -47,7 +56,16 @@ pub fn is_jaeum(code: u32) -> bool {
 /// Alias for is_jaeum.
 pub use self::is_jaeum as is_consonant;
 
-/// Checks if the character is a vowel, or moeum (모음).
+/// Checks if the u32 is a vowel, or moeum (모음).
+/// Checks both Jamo and Compatibility Jamo unicode blocks.
+///
+/// ```rust
+/// use hangeul::is_moeum; // is_vowel
+///
+/// assert_eq!(true, is_moeum('ᅡ' as u32));
+/// assert_eq!(true, is_moeum('ㅏ' as u32));
+/// assert_eq!(false, is_moeum('ㄱ' as u32));
+/// ```
 pub fn is_moeum(code: u32) -> bool {
     (code >= COMPAT_JUNGSEONG_START && code <= COMPAT_JUNGSEONG_END)
     || (code >= JUNGSEONG_START && code <= JUNGSEONG_END)
@@ -67,6 +85,21 @@ pub fn is_compat_jamo(code: u32) -> bool {
     (code >= COMPAT_JAMO_START && code <= COMPAT_JAMO_END)
 }
 
+/// Checks if a u32 is a (composable) Hangeul Syllable or Jamo.
+/// Archaic Korean is not supported at this time.
+/// See:
+/// * https://en.wikipedia.org/wiki/Hangul_Syllables.
+/// * https://en.wikipedia.org/wiki/Hangul_Jamo_(Unicode_block)
+/// * https://en.wikipedia.org/wiki/Hangul_Compatibility_Jamo
+///
+/// ```rust
+/// use hangeul::is_hangeul;
+///
+/// assert_eq!(true, is_hangeul('한' as u32));
+/// assert_eq!(true, is_hangeul('ㅏ' as u32));
+/// assert_eq!(true, is_hangeul('ᆶ' as u32));
+/// assert_eq!(false, is_hangeul('a' as u32));
+/// ```
 pub fn is_hangeul(code: u32) -> bool {
     if code >= SYLLABLE_START && code <= SYLLABLE_END {
         return true;
@@ -137,8 +170,7 @@ pub fn is_choseong(code: u32) -> bool {
 pub use self::is_choseong as is_lead;
 
 pub fn is_jungseong(code: u32) -> bool {
-    (code >= COMPAT_JUNGSEONG_START && code <= COMPAT_JUNGSEONG_END)
-    || (code >= JUNGSEONG_START && code <= JUNGSEONG_END)
+    Jungseong::from_u32(code).is_some()
 }
 
 pub fn is_jongseong(code: u32) -> bool {
@@ -147,9 +179,31 @@ pub fn is_jongseong(code: u32) -> bool {
 /// Alias for is_choseong.
 pub use self::is_jongseong as is_tail;
 
+/// Checks if a str ends in a consonant or not.
+pub fn ends_with_jongseong(content: &str) -> Result<bool> {
+    let c = match content.chars().last() {
+        Some(x) => x,
+        None => return Err(HangeulError::NotASyllable),
+    };
+    has_jongseong(&c)
+}
+/// Alias for ends_with_jongseong.
+pub use self::ends_with_jongseong as ends_in_consonant;
+
 type Decomposed = (char, char, Option<char>);
 
-#[allow(dead_code)]
+/// Attempts to decompose a string of Hangeul characters. See `decompose_char`. 
+///
+/// ```rust
+/// use hangeul::decompose;
+///
+/// let dae_han = "대한";
+/// let decomposed = vec![
+///     Ok(('ㄷ', 'ㅐ', None)),
+///     Ok(('ㅎ', 'ㅏ', Some('ㄴ'))),
+/// ];
+/// assert_eq!(decomposed, decompose(dae_han));
+/// ```
 pub fn decompose(content: &str) -> Vec<Result<Decomposed>> {
     content
         .chars()
@@ -157,7 +211,16 @@ pub fn decompose(content: &str) -> Vec<Result<Decomposed>> {
         .collect()
 }
 
-#[allow(dead_code)]
+/// Attempts to decompose a char. Errors if the first and second glyphs
+/// aren't valid Korean jamo. See [Compatibility Jamo](https://en.wikipedia.org/wiki/Hangul_Compatibility_Jamo).
+///
+/// ```rust
+/// use hangeul::decompose_char;
+///
+/// let bap = '밮';
+/// let b_a_p = ('ㅂ', 'ㅏ', Some('ㅍ'));
+/// assert_eq!(b_a_p, decompose_char(&bap).unwrap());
+/// ```
 pub fn decompose_char(c: &char) -> Result<Decomposed> {
     let choseong = get_choseong(c)?;
     let jungseong = get_jungseong(c)?;
@@ -172,4 +235,45 @@ pub fn decompose_char(c: &char) -> Result<Decomposed> {
         jungseong,
         jongseong
     ))
+}
+
+
+/// Attempts to compose a Hangeul character (in the `Hangeul Syllable` unicode range,
+/// `AC00`–`D7A3`). See [Hangeul Syllables](https://en.wikipedia.org/wiki/Hangul_Syllables).
+///
+/// ```rust
+/// use hangeul::compose_char;
+///
+/// let bap = '밮';
+/// let b = 'ㅂ';
+/// let a = 'ㅏ';
+/// let p = 'ㅍ';
+/// assert_eq!(bap, compose_char(&b, &a, Some(&p)).unwrap());
+/// ```
+pub fn compose_char(choseong: &char, jungseong: &char, jongseong: Option<&char>)
+-> Result<char> {
+    let cho_code = match Choseong::from_char(choseong) {
+        Some(cho) => cho.composable_u32(),
+        None => return Err(HangeulError::Uncomposable)
+    };
+
+    let jung_code = match Jungseong::from_char(jungseong) {
+        Some(jung) => jung.composable_u32(),
+        None => return Err(HangeulError::Uncomposable)
+    };
+
+    let jong_code = match jongseong {
+        Some(c) => {
+            match Jongseong::from_char(c) {
+                Some(jong) => jong.composable_u32(),
+                None => 0,
+            }
+        },
+        None => 0
+    };
+
+    let code = cho_code + jung_code + jong_code + HANGEUL_OFFSET;
+
+    std::char::from_u32(code)
+        .ok_or_else(|| HangeulError::Uncomposable)
 }
