@@ -1,8 +1,12 @@
 [package]
 name = "hangeul"
-version = "0.1.3"
-authors = ["Jang Ryeol <ryeolj5911@gmail.com>"]
+version = "0.2.0"
+authors = [
+  "Jang Ryeol <ryeolj5911@gmail.com>",
+  "Andrew Zah <zah@andrewzah.com>"
+]
 description = "Korean alphabet manipulation library"
+edition = "2018"
 
 documentation = "https://docs.rs/hangeul"
 repository = "https://github.com/bekker/hangeul-rs"
@@ -11,5 +15,3 @@ readme = "README.md"
 
 keywords = ["hangul", "hangeul", "korean", "libhangul"]
 license = "MIT"
-
-[dependencies]

@@ -1,359 +1,369 @@
-#![doc(include = "README.md")]
+pub mod errors;
+pub mod models;
 
-use std::fmt;
-use std::error;
+use crate::models::*;
+use crate::errors::*;
 
-#[cfg(test)]
-mod tests {
-    use super::JAMO_TO_CHOSEONG;
-    use super::JAMO_TO_JONGSEONG;
-    use super::CHOSEONG_TO_JAMO;
-    use super::JONGSEONG_TO_JAMO;
-
-    #[test]
-    fn jamo_table_test() {
-        for x in 0..JAMO_TO_CHOSEONG.len() {
-            let choseong_index = JAMO_TO_CHOSEONG[x];
-            if choseong_index == -1 {
-                continue;
-            }
-
-            let jamo_index = CHOSEONG_TO_JAMO[choseong_index as usize] as usize;
-            assert_eq!(jamo_index, x);
-        }
-
-        for x in 0..JAMO_TO_JONGSEONG.len() {
-            let jongseong_index = JAMO_TO_JONGSEONG[x];
-            if jongseong_index == -1 {
-                continue;
-            }
-
-            let jamo_index = JONGSEONG_TO_JAMO[jongseong_index as usize] as usize;
-            assert_eq!(jamo_index, x);
-        }
-    }
-}
-
-#[derive(Debug)]
-pub enum HangeulError {
-    NotSyllable,
-    Uncomposable,
-}
-
-impl fmt::Display for HangeulError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            HangeulError::NotSyllable => write!(f, "HangeulError: Not correct Hangeul syllable"),
-            HangeulError::Uncomposable => write!(f, "HangeulError: Uncomposable")
-        }
-    }
-}
-
-impl error::Error for HangeulError {
-    fn description(&self) -> &str {
-        match *self {
-            HangeulError::NotSyllable => "HangeulError: Not correct Hangeul syllable",
-            HangeulError::Uncomposable => "HangeulError: Uncomposable"
-        }
-    }
-    fn cause(&self) -> Option<&error::Error> {
-        match *self {
-            _ => None
-        }
-    }
-}
-
-const JAMO_TO_CHOSEONG: [i32; 30] = [
-    0x00,  // ㄱ 0x3131
-    0x01,  // ㄲ
-    -1,    // ㄳ
-    0x02,  // ㄴ
-    -1,    // ㄵ
-    -1,    // ㄶ
-    0x03,  // ㄷ
-    0x04,  // ㄸ
-    0x05,  // ㄹ
-    -1,    // ㄺ
-    -1,    // ㄻ
-    -1,    // ㄼ
-    -1,    // ㄽ
-    -1,    // ㄾ
-    -1,    // ㄿ
-    -1,    // ㅀ
-    0x06,  // ㅁ
-    0x07,  // ㅂ
-    0x08,  // ㅃ
-    -1,    // ㅄ
-    0x09,  // ㅅ
-    0x0A,  // ㅆ
-    0x0B,  // ㅇ
-    0x0C,  // ㅈ
-    0x0D,  // ㅉ
-    0x0E,  // ㅊ
-    0x0F,  // ㅋ
-    0x10,  // ㅌ
-    0x11,  // ㅍ
-    0x12,  // ㅎ 0x314E
-];
-
-const JAMO_TO_JONGSEONG: [i32; 30] = [
-    0x00,  // ㄱ 0x3131
-    0x01,  // ㄲ
-    0x02,  // ㄳ
-    0x03,  // ㄴ
-    0x04,  // ㄵ
-    0x05,  // ㄶ
-    0x06,  // ㄷ
-    -1,    // ㄸ
-    0x07,  // ㄹ
-    0x08,  // ㄺ
-    0x09,  // ㄻ
-    0x0A,  // ㄼ
-    0x0B,  // ㄽ
-    0x0C,  // ㄾ
-    0x0D,  // ㄿ
-    0x0E,  // ㅀ
-    0x0F,  // ㅁ
-    0x10,  // ㅂ
-    -1,    // ㅃ
-    0x11,  // ㅄ
-    0x12,  // ㅅ
-    0x13,  // ㅆ
-    0x14,  // ㅇ
-    0x15,  // ㅈ
-    -1,    // ㅉ
-    0x16,  // ㅊ
-    0x17,  // ㅋ
-    0x18,  // ㅌ
-    0x19,  // ㅍ
-    0x1A,  // ㅎ 0x314E
-];
-
-// These tables are for converting to compatible jamo
-const CHOSEONG_TO_JAMO: [u32; 19] = [
-    0x00, // ㄱ
-    0x01, // ㄲ
-    0x03, // ㄴ
-    0x06, // ㄷ
-    0x07, // ㄸ
-    0x08, // ㄹ
-    0x10, // ㅁ
-    0x11, // ㅂ
-    0x12, // ㅃ
-    0x14, // ㅅ
-    0x15, // ㅆ
-    0x16, // ㅇ
-    0x17, // ㅈ
-    0x18, // ㅉ
-    0x19, // ㅊ
-    0x1A, // ㅋ
-    0x1B, // ㅌ
-    0x1C, // ㅍ
-    0x1D, // ㅎ
-];
-
-const JONGSEONG_TO_JAMO: [u32; 27] = [
-    0x00, // ㄱ
-    0x01, // ㄲ
-    0x02, // ㄳ
-    0x03, // ㄴ
-    0x04, // ㄵ
-    0x05, // ㄶ
-    0x06, // ㄷ
-    0x08, // ㄹ
-    0x09, // ㄺ
-    0x0A, // ㄻ
-    0x0B, // ㄼ
-    0x0C, // ㄽ
-    0x0D, // ㄾ
-    0x0E, // ㄿ
-    0x0F, // ㅀ
-    0x10, // ㅁ
-    0x11, // ㅂ
-    0x13, // ㅄ
-    0x14, // ㅅ
-    0x15, // ㅆ
-    0x16, // ㅇ
-    0x17, // ㅈ
-    0x19, // ㅊ
-    0x1A, // ㅋ
-    0x1B, // ㅌ
-    0x1C, // ㅍ
-    0x1D, // ㅎ
-];
+const HANGEUL_OFFSET: u32 = 0xAC00; // 44032
 
 const SYLLABLE_START: u32 = 0xAC00;
-const SYLLABLE_END: u32 = 0xD7AF;
-const JAMO_START: u32 = 0x3131;
-const JAMO_END: u32 = 0x3163;
-const JAEUM_START: u32 = 0x3131;
-const JAEUM_END: u32 = 0x314E;
-const MOEUM_START: u32 = 0x314F;
-const MOEUM_END: u32 = 0x3163;
+const SYLLABLE_END: u32 = 0xD7A3;
+const JAMO_START: u32 = 0x1100;
+const JAMO_END: u32 = 0x11FF;
+const COMPAT_JAMO_START: u32 = 0x3131;
+const COMPAT_JAMO_END: u32 = 0x318E;
 
-fn _is_syllable(code:u32) -> bool {
+// lead/first chars
+const CHOSEONG_START: u32 = 0x1100;
+const CHOSEONG_END: u32 = 0x1112;
+const COMPAT_CHOSEONG_START: u32 = 0x3131;
+const COMPAT_CHOSEONG_END: u32 = 0x314E;
+
+// middle chars / vowels
+const JUNGSEONG_START: u32 = 0x1161;
+const JUNGSEONG_END: u32 = 0x1175;
+const COMPAT_JUNGSEONG_START: u32 = 0x314F;
+const COMPAT_JUNGSEONG_END: u32 = 0x3163;
+
+// tail/bottom/end chars
+const JONGSEONG_START: u32 = 0x11A8;
+const JONGSEONG_END: u32 = 0x11C2;
+const COMPAT_JONGSEONG_START: u32 = 0x3165;
+const COMPAT_JONGSEONG_END: u32 = 0x318E;
+
+/// Check if the u32 is a finished/composed Hangeul syllable.
+/// Returns true for the `0xAC00` to `0xD7A3` range.
+///
+/// ```rust
+/// use hangeul::is_syllable;
+///
+/// assert_eq!(true, is_syllable('한' as u32));
+/// assert_eq!(false, is_syllable('ㄱ' as u32));
+/// assert_eq!(false, is_syllable('ㅏ' as u32));
+/// ```
+pub fn is_syllable(code: u32) -> bool {
     (code >= SYLLABLE_START && code <= SYLLABLE_END)
 }
 
-/// Check if the syllable is correct Hangeul syllable
-pub fn is_syllable(c:char) -> bool {
-    let code = c as u32;
-    _is_syllable(code)
+/// Checks if the u32 is a consonant, or jaeum (자음).
+/// Checks both Jamo and Compatibility Jamo unicode blocks.
+pub fn is_jaeum(code: u32) -> bool {
+    (code >= COMPAT_CHOSEONG_START && code <= COMPAT_CHOSEONG_END)
+    || (code >= COMPAT_JONGSEONG_START && code <= COMPAT_JONGSEONG_END)
+    || (code >= CHOSEONG_START && code <= CHOSEONG_END)
+    || (code >= JONGSEONG_START && code <= JONGSEONG_END)
 }
+/// Alias for is_jaeum.
+pub use self::is_jaeum as is_consonant;
 
-fn syllable_to_u32(c:char) -> Result<u32, HangeulError> {
-    let code = c as u32;
-    if _is_syllable(code) {
-        Ok(code)
-    } else {
-        Err(HangeulError::NotSyllable)
-    }
+/// Checks if the u32 is a vowel, or moeum (모음).
+/// Checks both Jamo and Compatibility Jamo unicode blocks.
+///
+/// ```rust
+/// use hangeul::is_moeum; // is_vowel
+///
+/// assert_eq!(true, is_moeum('ᅡ' as u32));
+/// assert_eq!(true, is_moeum('ㅏ' as u32));
+/// assert_eq!(false, is_moeum('ㄱ' as u32));
+/// ```
+pub fn is_moeum(code: u32) -> bool {
+    (code >= COMPAT_JUNGSEONG_START && code <= COMPAT_JUNGSEONG_END)
+    || (code >= JUNGSEONG_START && code <= JUNGSEONG_END)
 }
+/// Alias for is_moeum.
+pub use self::is_moeum as is_vowel;
 
-/// Get choseong (top) of the syllable as compatible jamo
-pub fn get_choseong(c:char) -> Result<char, HangeulError> {
-    let code = try!(syllable_to_u32(c));
-    let x = (code - SYLLABLE_START) / 21 / 28;
-    std::char::from_u32(CHOSEONG_TO_JAMO[x as usize] + JAMO_START).ok_or(HangeulError::NotSyllable)
-}
-
-/// Alias for get_choseong
-pub use self::get_choseong as get_top;
-
-/// Get jungseong (middle) of the syllable as compatible jamo
-pub fn get_jungseong(c:char) -> Result<char, HangeulError> {
-    let code = try!(syllable_to_u32(c));
-    std::char::from_u32(((code - SYLLABLE_START) % (21 * 28)) / 28 + MOEUM_START).ok_or(HangeulError::NotSyllable)
-}
-
-/// Alias for get_jungseong
-pub use self::get_jungseong as get_middle;
-
-/// Get jongseong (bottom) of the syllable as compatible jamo
-pub fn get_jongseong(c:char) -> Result<Option<char>, HangeulError> {
-    let code = try!(syllable_to_u32(c));
-    // x should be i32, can be negative
-    let x:i32 = (code - SYLLABLE_START) as i32 % 28 - 1;
-    if x >= 0 {
-        std::char::from_u32(JONGSEONG_TO_JAMO[x as usize] + JAMO_START)
-            .map_or(Err(HangeulError::NotSyllable), |c| Ok(Some(c)))
-    } else {
-        Ok(None)
-    }
-}
-
-/// Alias for get_jongseong
-pub use self::get_jongseong as get_bottom;
-
-/// Check if the syllable has jongseong (bottom)
-pub fn has_jongseong(c:char) -> Result<bool, HangeulError> {
-    let code = try!(syllable_to_u32(c));
-    Ok((code - SYLLABLE_START) % 28 != 0)
-}
-
-/// Alias for has_jongseong
-pub use self::has_jongseong as has_bottom;
-
-/// Check if the end syllable of the string has jongseong (bottom)
-pub fn ends_with_jongseong(s:&str) -> Result<bool, HangeulError> {
-    let c = match s.chars().last() {
-        Some(x) => x,
-        None => return Err(HangeulError::NotSyllable),
-    };
-    has_jongseong(c)
-}
-
-/// Alias for ends_with_jongseong
-pub use self::ends_with_jongseong as ends_with_bottom;
-
-/// Check if the char is compatible jamo
-pub fn is_jamo(c:char) -> bool {
-    let code = c as u32;
+/// Returns true from `0x1100` to `0x11FF`.
+/// See [Hangeul Jamo](https://en.wikipedia.org/wiki/Hangul_Jamo_(Unicode_block)).
+///
+/// ```rust
+/// use hangeul::is_jamo;
+///
+/// assert_eq!(true, is_jamo('ᅡ' as u32)); // 0x1161
+/// assert_eq!(false, is_jamo('ㅏ' as u32)); // 0x314F
+/// assert_eq!(false, is_jamo('한' as u32));
+/// ```
+pub fn is_jamo(code: u32) -> bool {
     (code >= JAMO_START && code <= JAMO_END)
 }
 
-fn _is_jaeum(code:u32) -> bool {
-    (code >= JAEUM_START && code <= JAEUM_END)
+/// Returns true from `0x3131` to `0x318E`.
+/// See [Compatibility Jamo](https://en.wikipedia.org/wiki/Hangul_Compatibility_Jamo).
+pub fn is_compat_jamo(code: u32) -> bool {
+    (code >= COMPAT_JAMO_START && code <= COMPAT_JAMO_END)
 }
 
-/// Check if the char is compatible jaeum
-pub fn is_jaeum(c:char) -> bool {
-    let code = c as u32;
-    _is_jaeum(code)
+/// Checks if a u32 is a (composable) Hangeul Syllable or Jamo.
+/// Archaic Korean is not supported at this time.
+/// See:
+/// * https://en.wikipedia.org/wiki/Hangul_Syllables.
+/// * https://en.wikipedia.org/wiki/Hangul_Jamo_(Unicode_block)
+/// * https://en.wikipedia.org/wiki/Hangul_Compatibility_Jamo
+///
+/// ```rust
+/// use hangeul::is_hangeul;
+///
+/// assert_eq!(true, is_hangeul('한' as u32));
+/// assert_eq!(true, is_hangeul('ㅏ' as u32));
+/// assert_eq!(true, is_hangeul('ᆶ' as u32));
+/// assert_eq!(false, is_hangeul('a' as u32));
+/// ```
+pub fn is_hangeul(code: u32) -> bool {
+    if code >= SYLLABLE_START && code <= SYLLABLE_END {
+        return true;
+    } else if code >= JAMO_START && code <= JAMO_END {
+        return true;
+    } else if code >= COMPAT_JAMO_START && code <= COMPAT_JAMO_END {
+        return true;
+    }
+
+    return false;
 }
 
-/// Alias for is_jaeum
-pub use self::is_jaeum as is_consonant;
+/// Casts a char to u32. Errors if said u32 falls outside of the Hangeul Syllable unicode range.
+/// See `is_hangeul`.
+///
+/// ```rust
+/// use hangeul::to_hangeul_u32;
+/// use hangeul::errors::HangeulError;
+///
+/// assert_eq!(Ok(0xB242), to_hangeul_u32(&'뉂'));
+/// assert_eq!(Ok(0xBDC6), to_hangeul_u32(&'뷆'));
+/// assert_eq!(Err(HangeulError::NotASyllable), to_hangeul_u32(&'ㅏ'));
+/// assert_eq!(Err(HangeulError::NotASyllable), to_hangeul_u32(&'何'));
+/// ```
+pub fn to_hangeul_u32(c: &char) -> Result<u32> {
+    let code = *c as u32;
 
-fn _is_moeum(code:u32) -> bool {
-    (code >= MOEUM_START && code <= MOEUM_END)
+    match is_syllable(code) {
+        true => Ok(code),
+        false => Err(HangeulError::NotASyllable),
+    }
 }
 
-/// Check if the char is compatible moeum
-pub fn is_moeum(c:char) -> bool {
-    let code = c as u32;
-    _is_moeum(code)
+/// Wrapper around `Choseong` to get the first/lead character from a Hangeul syllable.
+/// See models::Choseong.
+///
+/// ```rust
+/// use hangeul::get_choseong; // get_lead
+/// use hangeul::errors::HangeulError;
+/// use hangeul::models::Choseong;
+///
+/// assert_eq!(Ok('ㄱ'), get_choseong(&'갅'));
+/// assert_eq!(Err(HangeulError::JamoNotFound), get_choseong(&'ㅏ'));
+/// ```
+pub fn get_choseong(c: &char) -> Result<char> {
+    match Choseong::from_char(c) {
+        Some(cho) => Ok(cho.to_char()),
+        None => Err(HangeulError::JamoNotFound)
+    }
+}
+/// Alias for get_choseong.
+pub use self::get_choseong as get_lead;
+
+/// Wrapper around `Jungseong` to get the middle/vowel character from a Hangeul syllable.
+/// See models::Jungseong.
+///
+/// ```rust
+/// use hangeul::get_jungseong; // get_middle
+/// use hangeul::errors::HangeulError;
+/// use hangeul::models::Jungseong;
+///
+/// assert_eq!(Ok('ㅏ'), get_jungseong(&'갅'));
+/// assert_eq!(Err(HangeulError::JamoNotFound), get_jungseong(&'ㄱ'));
+/// ```
+pub fn get_jungseong(c: &char) -> Result<char> {
+    match Jungseong::from_char(c) {
+        Some(jung) => Ok(jung.to_char()),
+        None => Err(HangeulError::JamoNotFound)
+    }
+}
+/// Alias for get_jungseong.
+pub use self::get_jungseong as get_middle;
+
+/// Wrapper around `Jongseong` to get the bottom/tail character from a Hangeul syllable.
+/// See models::Jongseong.
+///
+/// ```rust
+/// use hangeul::get_jongseong; // get_tail
+/// use hangeul::errors::HangeulError;
+/// use hangeul::models::Jongseong;
+///
+/// assert_eq!(Ok('ㄵ'), get_jongseong(&'갅'));
+/// assert_eq!(Err(HangeulError::JamoNotFound), get_jongseong(&'ㅏ'));
+/// ```
+pub fn get_jongseong(c: &char) -> Result<char> {
+    match Jongseong::from_char(c) {
+        Some(jong) => Ok(jong.to_char()),
+        None => Err(HangeulError::JamoNotFound)
+    }
+}
+/// Alias for get_jongseong.
+pub use self::get_jongseong as get_tail;
+
+/// Check if the syllable has a tail, or jongseong (종성).
+/// use hangeul::has_jongseong; // has_jongseong
+/// ```rust
+/// use hangeul::has_jongseong;
+/// use hangeul::errors::HangeulError;
+///
+/// assert_eq!(Ok(true), has_jongseong(&'갅'));
+/// assert_eq!(Ok(false), has_jongseong(&'가'));
+/// assert_eq!(Err(HangeulError::NotASyllable), has_jongseong(&'b'));
+/// ```
+pub fn has_jongseong(c: &char) -> Result<bool> {
+    let code = to_hangeul_u32(c)?;
+
+    Ok((code - HANGEUL_OFFSET) % 28 != 0)
+}
+/// Alias for has_jongseong.
+pub use self::has_jongseong as has_tail;
+
+/// Checks if a char is a lead jamo, or choseong (중성).
+///
+/// ```rust
+/// use hangeul::is_choseong; //is_lead
+///
+/// assert_eq!(true, is_choseong('ㅉ' as u32));
+/// assert_eq!(false, is_choseong('ㅏ' as u32));
+/// assert_eq!(false, is_choseong('ㄵ' as u32));
+/// ```
+pub fn is_choseong(code: u32) -> bool {
+    Choseong::from_u32(code).is_some()
+}
+/// Alias for is_choseong.
+pub use self::is_choseong as is_lead;
+
+/// Checks if a char is a middle/vowel jamo, or jungseong (중성).
+///
+/// ```rust
+/// use hangeul::is_jungseong; //is_vowel
+///
+/// assert_eq!(false, is_jungseong('ㅉ' as u32));
+/// assert_eq!(true, is_jungseong('ㅏ' as u32));
+/// assert_eq!(false, is_jungseong('ㄵ' as u32));
+/// ```
+pub fn is_jungseong(code: u32) -> bool {
+    Jungseong::from_u32(code).is_some()
 }
 
-/// Alias for is_moeum
-pub use self::is_moeum as is_vowel;
+/// Checks if a char is a tail jamo, or jongseong (종성).
+///
+/// ```rust
+/// use hangeul::is_jongseong; //is_tail
+///
+/// assert_eq!(false, is_jongseong('ㅉ' as u32));
+/// assert_eq!(false, is_jongseong('ㅏ' as u32));
+/// assert_eq!(true, is_jongseong('ㄵ' as u32));
+/// ```
+pub fn is_jongseong(code: u32) -> bool {
+    Jongseong::from_u32(code).is_some()
+}
+/// Alias for is_choseong.
+pub use self::is_jongseong as is_tail;
 
-fn _is_choseong(code:u32) -> bool {
-    _is_jaeum(code) && (JAMO_TO_CHOSEONG[(code - JAEUM_START) as usize] != -1)
+/// Checks if a str's last char ends in a consonant or not.
+///
+/// ```rust
+/// use hangeul::ends_with_jongseong; // ends_with_consonant
+///
+/// assert_eq!(Ok(false), ends_with_jongseong("피카츄"));
+/// assert_eq!(Ok(true), ends_with_jongseong("이상해꽃"));
+/// ```
+pub fn ends_with_jongseong(content: &str) -> Result<bool> {
+    let c = match content.chars().last() {
+        Some(x) => x,
+        None => return Err(HangeulError::NotASyllable),
+    };
+    has_jongseong(&c)
+}
+/// Alias for ends_with_jongseong.
+pub use self::ends_with_jongseong as ends_in_consonant;
+
+type Decomposed = (char, char, Option<char>);
+
+/// Attempts to decompose a string of Hangeul characters. See `decompose_char`. 
+///
+/// ```rust
+/// use hangeul::decompose;
+///
+/// let dae_han = "대한";
+/// let decomposed = vec![
+///     Ok(('ㄷ', 'ㅐ', None)),
+///     Ok(('ㅎ', 'ㅏ', Some('ㄴ'))),
+/// ];
+/// assert_eq!(decomposed, decompose(dae_han));
+/// ```
+pub fn decompose(content: &str) -> Vec<Result<Decomposed>> {
+    content
+        .chars()
+        .map(|c| decompose_char(&c))
+        .collect()
 }
 
-/// Check if the char is compatible jamo which can be a choseong (top)
-pub fn is_choseong(c:char) -> bool {
-    let code = c as u32;
-    _is_choseong(code)
+/// Attempts to decompose a char. Errors if the first and second glyphs
+/// aren't valid Korean jamo. See [Compatibility Jamo](https://en.wikipedia.org/wiki/Hangul_Compatibility_Jamo).
+///
+/// ```rust
+/// use hangeul::decompose_char;
+///
+/// let bap = '밮';
+/// let b_a_p = ('ㅂ', 'ㅏ', Some('ㅍ'));
+/// assert_eq!(b_a_p, decompose_char(&bap).unwrap());
+/// ```
+pub fn decompose_char(c: &char) -> Result<Decomposed> {
+    let choseong = get_choseong(c)?;
+    let jungseong = get_jungseong(c)?;
+
+    let jongseong = match Jongseong::from_char(c) {
+        Some(jong) => Some(jong.to_char()),
+        None => None,
+    };
+
+    Ok((
+        choseong,
+        jungseong,
+        jongseong
+    ))
 }
 
-/// Alias for is_choseong
-pub use self::is_choseong as is_top;
 
-fn _is_jongseong(code:u32) -> bool {
-    _is_jaeum(code) && (JAMO_TO_JONGSEONG[(code - JAEUM_START) as usize] != -1)
-}
+/// Attempts to compose a Hangeul character (in the `Hangeul Syllable` unicode range,
+/// `AC00`–`D7A3`). See [Hangeul Syllables](https://en.wikipedia.org/wiki/Hangul_Syllables).
+///
+/// ```rust
+/// use hangeul::compose_char;
+///
+/// let bap = '밮';
+/// let b = 'ㅂ';
+/// let a = 'ㅏ';
+/// let p = 'ㅍ';
+/// assert_eq!(bap, compose_char(&b, &a, Some(&p)).unwrap());
+/// ```
+pub fn compose_char(choseong: &char, jungseong: &char, jongseong: Option<&char>)
+-> Result<char> {
+    let cho_code = match Choseong::from_char(choseong) {
+        Some(cho) => cho.composable_u32(),
+        None => return Err(HangeulError::Uncomposable)
+    };
 
-/// Check if the char is compatible jamo which can be a jongseong (bottom)
-pub fn is_jongseong(c:char) -> bool {
-    let code = c as u32;
-    _is_jongseong(code)
-}
+    let jung_code = match Jungseong::from_char(jungseong) {
+        Some(jung) => jung.composable_u32(),
+        None => return Err(HangeulError::Uncomposable)
+    };
 
-/// Alias for is_jongseong
-pub use self::is_jongseong as is_bottom;
-
-/// Decompose a Hangeul syllable into compatible jamos
-pub fn decompose(c:char) -> Result<(char, char, Option<char>), HangeulError> {
-    let cho = try!(get_choseong(c));
-    let jung = try!(get_jungseong(c));
-    let jong = try!(get_jongseong(c));
-    Ok((cho, jung, jong))
-}
-
-/// Compose compatible jamos into a Hangeul syllable
-pub fn compose(choseong:char, jungseong:char, jongseong:Option<char>) -> Result<char, HangeulError> {
-    let cho_code = choseong as u32;
-    let jung_code = jungseong as u32;
     let jong_code = match jongseong {
-        Some(c) => c as u32,
+        Some(c) => {
+            match Jongseong::from_char(c) {
+                Some(jong) => jong.composable_u32(),
+                None => 0,
+            }
+        },
         None => 0
     };
 
-    if !_is_choseong(cho_code) || !_is_moeum(jung_code) || !(jong_code == 0 || _is_jongseong(jong_code)) {
-        return Err(HangeulError::Uncomposable);
-    }
+    let code = cho_code + jung_code + jong_code + HANGEUL_OFFSET;
 
-    let composed = match jong_code == 0 {
-        true => JAMO_TO_CHOSEONG[(cho_code - JAEUM_START) as usize] as u32 * 21 * 28
-                + (jung_code - MOEUM_START) * 28
-                + SYLLABLE_START,
-        false => JAMO_TO_CHOSEONG[(cho_code - JAEUM_START) as usize] as u32 * 21 * 28
-                + (jung_code - MOEUM_START) * 28
-                + JAMO_TO_JONGSEONG[(jong_code - JAEUM_START) as usize] as u32 + 1
-                + SYLLABLE_START
-    };
-    
-    std::char::from_u32(composed).ok_or(HangeulError::Uncomposable)
+    std::char::from_u32(code)
+        .ok_or_else(|| HangeulError::Uncomposable)
 }

@@ -1,21 +1,3 @@
-# hangeul-rs
-
-[![builds.sr.ht status](https://builds.sr.ht/~andrewzah/hangeul-rs.svg)](https://builds.sr.ht/~andrewzah/hangeul-rs?)
-[![docs badge](https://docs.rs/hangeul/badge.svg)](https://docs.rs/hangeul)
-[![crates version badge](https://img.shields.io/crates/v/hangeul.svg)](https://crates.io/crates/hangeul)
-
-A lightweight Korean alphabet manipulation library for Rust. No external crates are used.
-
-Only modern, composable Korean unicode blocks are supported (`AC00`–`D7AF`, `1100`–`11FF`, `3130`–`318F`).
-
-```toml
-[dependencies]
-hangeul = "0.2.0"
-```
-
-## Usage
-
-```rust
 extern crate hangeul;
 
 fn main() {
@@ -41,13 +23,3 @@ fn main() {
 
     println!("{}", sentence_in_choseong); // ㅇㅅㅇ ㅍㅋㅊㄱ ㄴㅌㄴㄷ!
 }
-```
-
-## Examples
-[Examples](./examples).
-
-## Documentation
-[Docs.rs](https://docs.rs/hangeul/)
-
-## License
-Distributed under MIT License

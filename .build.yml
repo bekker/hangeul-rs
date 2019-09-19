@@ -1,0 +1,9 @@
+image: alpine/edge
+packages:
+  - libgcc
+  - rust
+  - cargo
+tasks:
+  - test: |
+      cd hangeul-rs
+      cargo test
