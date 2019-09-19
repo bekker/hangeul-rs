@@ -1,6 +1,6 @@
 # hangeul-rs
 
-[![builds.sr.ht status](https://builds.sr.ht/~andrewzah/hangeul-rs.svg)](https://builds.sr.ht/~andrewzah/hangeul-rs?)
+[![Build Status](https://travis-ci.org/bekker/hangeul-rs.svg?branch=master)](https://travis-ci.org/bekker/hangeul-rs)
 [![docs badge](https://docs.rs/hangeul/badge.svg)](https://docs.rs/hangeul)
 [![crates version badge](https://img.shields.io/crates/v/hangeul.svg)](https://crates.io/crates/hangeul)
 
