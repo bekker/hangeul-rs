@@ -115,7 +115,7 @@ impl Choseong {
     }
 
     pub fn to_char(&self) -> char {
-        match *self {
+        match self {
             Choseong::Giyeok      => 'ㄱ',
             Choseong::SsangGiyeok => 'ㄲ',
             Choseong::Nieun       => 'ㄴ',
@@ -141,7 +141,7 @@ impl Choseong {
 
 impl Syllable for Choseong {
     fn to_u32(&self) -> u32 {
-        match *self {
+        match self {
             Choseong::Giyeok      => 0x1100,
             Choseong::SsangGiyeok => 0x1101,
             Choseong::Nieun       => 0x1102,
@@ -286,9 +286,8 @@ impl Jungseong {
         }
     }
 
-
     pub fn to_char(&self) -> char {
-        match *self {
+        match self {
             Jungseong::A   => 'ㅏ',
             Jungseong::AE  => 'ㅐ',
             Jungseong::YA  => 'ㅑ',
@@ -316,7 +315,7 @@ impl Jungseong {
 
 impl Syllable for Jungseong {
     fn to_u32(&self) -> u32 {
-        match *self {
+        match self {
             Jungseong::A   => 0x1161,
             Jungseong::AE  => 0x1162,
             Jungseong::YA  => 0x1163,
@@ -342,7 +341,7 @@ impl Syllable for Jungseong {
     }
 
     fn composable_u32(&self) -> u32 {
-        let value = match *self {
+        let value = match self {
             Jungseong::A   => 0,
             Jungseong::AE  => 1,
             Jungseong::YA  => 2,
@@ -482,7 +481,7 @@ impl Jongseong {
     }
 
     pub fn to_char(&self) -> char {
-        match *self {
+        match self {
             Jongseong::Giyeok      => 'ㄱ',
             Jongseong::SsangGiyeok => 'ㄲ',
             Jongseong::GiyeokSiot  => 'ㄳ',
@@ -516,7 +515,7 @@ impl Jongseong {
 
 impl Syllable for Jongseong {
     fn to_u32(&self) -> u32 {
-        match *self {
+        match self {
             Jongseong::Giyeok      => 0x11A8,
             Jongseong::SsangGiyeok => 0x11A9,
             Jongseong::GiyeokSiot  => 0x11AA,
@@ -548,7 +547,7 @@ impl Syllable for Jongseong {
     }
 
     fn composable_u32(&self) -> u32 {
-        match *self {
+        match self {
             Jongseong::Giyeok      => 1,
             Jongseong::SsangGiyeok => 2,
             Jongseong::GiyeokSiot  => 3,
