@@ -2,9 +2,17 @@ use crate::is_syllable;
 
 const HANGEUL_OFFSET: u32 = 0xAC00; // 44032
 
+const CHOSEONG_COUNT: u32 = 588;
+const JUNGSEONG_COUNT: u32 = 28;
+
+const CHOSEONG_START: u32 = 0x1100;
+const JUNGSEONG_START: u32 = 0x1161;
+const JONGSEONG_START: u32 = 0x11A8;
+
 pub trait Syllable {
     fn composable_u32(&self) -> u32;
     fn to_u32(&self) -> u32;
+    fn to_index(&self) -> u32;
 }
 
 #[derive(Debug, PartialEq)]
@@ -44,30 +52,9 @@ impl Choseong {
     }
 
     pub fn from_syllable(code: u32) -> Option<Choseong> {
-        let value = 1 + (code - HANGEUL_OFFSET) / 588;
+        let value = (code - HANGEUL_OFFSET) / CHOSEONG_COUNT;
 
-        match value {
-            1  => Some(Choseong::Giyeok),
-            2  => Some(Choseong::SsangGiyeok),
-            3  => Some(Choseong::Nieun),
-            4  => Some(Choseong::Digeut),
-            5  => Some(Choseong::SsangDigeut),
-            6  => Some(Choseong::Rieul),
-            7  => Some(Choseong::Mieum),
-            8  => Some(Choseong::Bieup),
-            9  => Some(Choseong::SsangBieup),
-            10 => Some(Choseong::Siot),
-            11 => Some(Choseong::SsangSiot),
-            12 => Some(Choseong::Ieung),
-            13 => Some(Choseong::Jieut),
-            14 => Some(Choseong::SsangJieut),
-            15 => Some(Choseong::Chieut),
-            16 => Some(Choseong::Kiyeok),
-            17 => Some(Choseong::Tieut),
-            18 => Some(Choseong::Pieup),
-            19 => Some(Choseong::Hieuh),
-            _ => None,
-        }
+        Self::from_jamo(value + CHOSEONG_START)
     }
 
     pub fn from_jamo(code: u32) -> Option<Choseong> {
@@ -122,31 +109,15 @@ impl Choseong {
 
 impl Syllable for Choseong {
     fn to_u32(&self) -> u32 {
-        match self {
-            Choseong::Giyeok      => 0x1100,
-            Choseong::SsangGiyeok => 0x1101,
-            Choseong::Nieun       => 0x1102,
-            Choseong::Digeut      => 0x1103,
-            Choseong::SsangDigeut => 0x1104,
-            Choseong::Rieul       => 0x1105,
-            Choseong::Mieum       => 0x1106,
-            Choseong::Bieup       => 0x1107,
-            Choseong::SsangBieup  => 0x1108,
-            Choseong::Siot        => 0x1109,
-            Choseong::SsangSiot   => 0x110A,
-            Choseong::Ieung       => 0x110B,
-            Choseong::Jieut       => 0x110C,
-            Choseong::SsangJieut  => 0x110D,
-            Choseong::Chieut      => 0x110E,
-            Choseong::Kiyeok      => 0x110F,
-            Choseong::Tieut       => 0x1110,
-            Choseong::Pieup       => 0x1111,
-            Choseong::Hieuh       => 0x1112,
-        }
+        Self::to_index(self) + CHOSEONG_START
     }
 
     fn composable_u32(&self) -> u32 {
-        let value = match self {
+        Self::to_index(self) * CHOSEONG_COUNT
+    }
+
+    fn to_index(&self) -> u32 {
+        match self {
             Choseong::Giyeok      => 0,
             Choseong::SsangGiyeok => 1,
             Choseong::Nieun       => 2,
@@ -166,9 +137,7 @@ impl Syllable for Choseong {
             Choseong::Tieut       => 16,
             Choseong::Pieup       => 17,
             Choseong::Hieuh       => 18,
-        };
-
-        value * 588
+        }
     }
 }
 
@@ -211,33 +180,10 @@ impl Jungseong {
     }
 
     pub fn from_syllable(code: u32) -> Option<Jungseong> {
-        let jongseong_code = (code - HANGEUL_OFFSET) % 28;
-        let value = 1 + (((code - HANGEUL_OFFSET - jongseong_code) % 588) / 28);
+        let jongseong_code = (code - HANGEUL_OFFSET) % JUNGSEONG_COUNT;
+        let value = ((code - HANGEUL_OFFSET - jongseong_code) % CHOSEONG_COUNT) / JUNGSEONG_COUNT;
 
-        match value {
-            1  => Some(Jungseong::A),
-            2  => Some(Jungseong::AE),
-            3  => Some(Jungseong::YA),
-            4  => Some(Jungseong::YAE),
-            5  => Some(Jungseong::EO),
-            6  => Some(Jungseong::E),
-            7  => Some(Jungseong::YEO),
-            8  => Some(Jungseong::YE),
-            9  => Some(Jungseong::O),
-            10 => Some(Jungseong::WA),
-            11 => Some(Jungseong::WAE),
-            12 => Some(Jungseong::OE),
-            13 => Some(Jungseong::YO),
-            14 => Some(Jungseong::U),
-            15 => Some(Jungseong::WEO),
-            16 => Some(Jungseong::WE),
-            17 => Some(Jungseong::WI),
-            18 => Some(Jungseong::YU),
-            19 => Some(Jungseong::EU),
-            20 => Some(Jungseong::YI),
-            21 => Some(Jungseong::I),
-            _ => None,
-        }
+        Self::from_jamo(value + JUNGSEONG_START)
     }
 
     pub fn from_jamo(code: u32) -> Option<Jungseong> {
@@ -296,33 +242,15 @@ impl Jungseong {
 
 impl Syllable for Jungseong {
     fn to_u32(&self) -> u32 {
-        match self {
-            Jungseong::A   => 0x1161,
-            Jungseong::AE  => 0x1162,
-            Jungseong::YA  => 0x1163,
-            Jungseong::YAE => 0x1164,
-            Jungseong::EO  => 0x1165,
-            Jungseong::E   => 0x1166,
-            Jungseong::YEO => 0x1167,
-            Jungseong::YE  => 0x1168,
-            Jungseong::O   => 0x1169,
-            Jungseong::WA  => 0x116A,
-            Jungseong::WAE => 0x116B,
-            Jungseong::OE  => 0x116C,
-            Jungseong::YO  => 0x116D,
-            Jungseong::U   => 0x116E,
-            Jungseong::WEO => 0x116F,
-            Jungseong::WE  => 0x1170,
-            Jungseong::WI  => 0x1171,
-            Jungseong::YU  => 0x1172,
-            Jungseong::EU  => 0x1173,
-            Jungseong::YI  => 0x1174,
-            Jungseong::I   => 0x1175,
-        }
+        Self::to_index(self) + JUNGSEONG_START
     }
 
     fn composable_u32(&self) -> u32 {
-        let value = match self {
+        Self::to_index(self) * JUNGSEONG_COUNT
+    }
+
+    fn to_index (&self) -> u32 {
+        match self {
             Jungseong::A   => 0,
             Jungseong::AE  => 1,
             Jungseong::YA  => 2,
@@ -344,9 +272,7 @@ impl Syllable for Jungseong {
             Jungseong::EU  => 18,
             Jungseong::YI  => 19,
             Jungseong::I   => 20,
-        };
-
-        value * 28
+        }
     }
 }
 
@@ -394,38 +320,9 @@ impl Jongseong {
     }
 
     pub fn from_syllable(code: u32) -> Option<Jongseong> {
-        let value = (code - HANGEUL_OFFSET) % 28;
+        let value = (code - HANGEUL_OFFSET) % JUNGSEONG_COUNT;
 
-        match value {
-            1  => Some(Jongseong::Giyeok),
-            2  => Some(Jongseong::SsangGiyeok),
-            3  => Some(Jongseong::GiyeokSiot),
-            4  => Some(Jongseong::Nieun),
-            5  => Some(Jongseong::NieunJieut),
-            6  => Some(Jongseong::NieunHieuh),
-            7  => Some(Jongseong::Digeut),
-            8  => Some(Jongseong::Rieul),
-            9  => Some(Jongseong::RieulGiyeok),
-            10 => Some(Jongseong::RieulMieum),
-            11 => Some(Jongseong::RieulBieup),
-            12 => Some(Jongseong::RieulSiot),
-            13 => Some(Jongseong::RieulTieut),
-            14 => Some(Jongseong::RieulPieup),
-            15 => Some(Jongseong::RieulHieuh),
-            16 => Some(Jongseong::Mieum),
-            17 => Some(Jongseong::Bieup),
-            18 => Some(Jongseong::BieupSiot),
-            19 => Some(Jongseong::Siot),
-            20 => Some(Jongseong::SsangSiot),
-            21 => Some(Jongseong::Ieung),
-            22 => Some(Jongseong::Jieut),
-            23 => Some(Jongseong::Chieut),
-            24 => Some(Jongseong::Kieuk),
-            25 => Some(Jongseong::Tieut),
-            26 => Some(Jongseong::Pieup),
-            27 => Some(Jongseong::Hieuh),
-            _ => None,
-        }
+        Self::from_jamo(value + JONGSEONG_START - 1)
     }
 
     pub fn from_jamo(code: u32) -> Option<Jongseong> {
@@ -496,38 +393,14 @@ impl Jongseong {
 
 impl Syllable for Jongseong {
     fn to_u32(&self) -> u32 {
-        match self {
-            Jongseong::Giyeok      => 0x11A8,
-            Jongseong::SsangGiyeok => 0x11A9,
-            Jongseong::GiyeokSiot  => 0x11AA,
-            Jongseong::Nieun       => 0x11AB,
-            Jongseong::NieunJieut  => 0x11AC,
-            Jongseong::NieunHieuh  => 0x11AD,
-            Jongseong::Digeut      => 0x11AE,
-            Jongseong::Rieul       => 0x11AF,
-            Jongseong::RieulGiyeok => 0x11B0,
-            Jongseong::RieulMieum  => 0x11B1,
-            Jongseong::RieulBieup  => 0x11B2,
-            Jongseong::RieulSiot   => 0x11B3,
-            Jongseong::RieulTieut  => 0x11B4,
-            Jongseong::RieulPieup  => 0x11B5,
-            Jongseong::RieulHieuh  => 0x11B6,
-            Jongseong::Mieum       => 0x11B7,
-            Jongseong::Bieup       => 0x11B8,
-            Jongseong::BieupSiot   => 0x11B9,
-            Jongseong::Siot        => 0x11BA,
-            Jongseong::SsangSiot   => 0x11BB,
-            Jongseong::Ieung       => 0x11BC,
-            Jongseong::Jieut       => 0x11BD,
-            Jongseong::Chieut      => 0x11BE,
-            Jongseong::Kieuk       => 0x11BF,
-            Jongseong::Tieut       => 0x11C0,
-            Jongseong::Pieup       => 0x11C1,
-            Jongseong::Hieuh       => 0x11C2,
-        }
+        Self::to_index(self) + JONGSEONG_START
     }
 
     fn composable_u32(&self) -> u32 {
+        Self::to_index(self)
+    }
+
+    fn to_index(&self) -> u32 {
         match self {
             Jongseong::Giyeok      => 1,
             Jongseong::SsangGiyeok => 2,
