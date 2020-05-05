@@ -1,13 +1,5 @@
 use crate::is_syllable;
-
-const HANGEUL_OFFSET: u32 = 0xAC00; // 44032
-
-const CHOSEONG_COUNT: u32 = 588;
-const JUNGSEONG_COUNT: u32 = 28;
-
-const CHOSEONG_START: u32 = 0x1100;
-const JUNGSEONG_START: u32 = 0x1161;
-const JONGSEONG_START: u32 = 0x11A8;
+use crate::constants::*;
 
 pub trait Syllable {
     fn composable_u32(&self) -> u32;

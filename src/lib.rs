@@ -1,10 +1,10 @@
+mod constants;
 pub mod errors;
 pub mod models;
 
+use crate::constants::*;
 use crate::models::*;
 use crate::errors::*;
-
-const HANGEUL_OFFSET: u32 = 0xAC00; // 44032
 
 /// Check if the u32 is a finished/composed Hangeul syllable.
 /// Returns true for the `0xAC00` to `0xD7A3` range.
@@ -17,27 +17,12 @@ const HANGEUL_OFFSET: u32 = 0xAC00; // 44032
 /// assert_eq!(false, is_syllable('ㅏ' as u32));
 /// ```
 pub fn is_syllable(code: u32) -> bool {
-    const SYLLABLE_START: u32 = 0xAC00;
-    const SYLLABLE_END: u32 = 0xD7A3;
-
     matches!(code, SYLLABLE_START..=SYLLABLE_END)
 }
 
 /// Checks if the u32 is a consonant, or jaeum (자음).
 /// Checks both Jamo and Compatibility Jamo unicode blocks.
 pub fn is_jaeum(code: u32) -> bool {
-    // lead/first chars
-    const CHOSEONG_START: u32 = 0x1100;
-    const CHOSEONG_END: u32 = 0x1112;
-    const COMPAT_CHOSEONG_START: u32 = 0x3131;
-    const COMPAT_CHOSEONG_END: u32 = 0x314E;
-
-    // tail/bottom/end chars
-    const JONGSEONG_START: u32 = 0x11A8;
-    const JONGSEONG_END: u32 = 0x11C2;
-    const COMPAT_JONGSEONG_START: u32 = 0x3165;
-    const COMPAT_JONGSEONG_END: u32 = 0x318E;
-
     matches!(
         code,
         COMPAT_CHOSEONG_START..=COMPAT_CHOSEONG_END
@@ -60,12 +45,6 @@ pub use self::is_jaeum as is_consonant;
 /// assert_eq!(false, is_moeum('ㄱ' as u32));
 /// ```
 pub fn is_moeum(code: u32) -> bool {
-    // middle chars / vowels
-    const JUNGSEONG_START: u32 = 0x1161;
-    const JUNGSEONG_END: u32 = 0x1175;
-    const COMPAT_JUNGSEONG_START: u32 = 0x314F;
-    const COMPAT_JUNGSEONG_END: u32 = 0x3163;
-
     matches!(code, COMPAT_JUNGSEONG_START..=COMPAT_JUNGSEONG_END | JUNGSEONG_START..=JUNGSEONG_END)
 }
 /// Alias for is_moeum.
@@ -82,18 +61,12 @@ pub use self::is_moeum as is_vowel;
 /// assert_eq!(false, is_jamo('한' as u32));
 /// ```
 pub fn is_jamo(code: u32) -> bool {
-    const JAMO_START: u32 = 0x1100;
-    const JAMO_END: u32 = 0x11FF;
-
     matches!(code, JAMO_START..=JAMO_END)
 }
 
 /// Returns true from `0x3131` to `0x318E`.
 /// See [Compatibility Jamo](https://en.wikipedia.org/wiki/Hangul_Compatibility_Jamo).
 pub fn is_compat_jamo(code: u32) -> bool {
-    const COMPATIBLE_JAMO_START: u32 = 0x3131;
-    const COMPATIBLE_JAMO_END: u32 = 0x318E;
-
     matches!(code, COMPATIBLE_JAMO_START..=COMPATIBLE_JAMO_END)
 }
 
@@ -210,7 +183,7 @@ pub use self::get_jongseong as get_tail;
 pub fn has_jongseong(c: &char) -> Result<bool> {
     let code = to_hangeul_u32(c)?;
 
-    Ok((code - HANGEUL_OFFSET) % 28 != 0)
+    Ok((code - HANGEUL_OFFSET) % JUNGSEONG_COUNT != 0)
 }
 /// Alias for has_jongseong.
 pub use self::has_jongseong as has_tail;
