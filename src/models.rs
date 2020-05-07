@@ -210,10 +210,10 @@ pub enum Jungseong {
     U,   // ㅜ
     WEO, // ㅝ
     WE,  // ㅞ
-    WI,  // ㅢ
+    WI,  // ㅟ
     YU,  // ㅠ
     EU,  // ㅡ
-    YI,  // 의
+    YI,  // ㅢ
     I,   // ㅣ
 }
 

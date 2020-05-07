@@ -14,7 +14,7 @@ impl fmt::Display for HangeulError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             HangeulError::JamoNotFound => write!(f, "HangeulError: Jamo not found"),
-            HangeulError::NotASyllable => write!(f, "HangeulError: Not correct Hangeul syllable"),
+            HangeulError::NotASyllable => write!(f, "HangeulError: Not a correct Hangeul syllable"),
             HangeulError::Uncomposable => write!(f, "HangeulError: Uncomposable"),
         }
     }
