@@ -12,7 +12,7 @@ pub enum HangeulError {
 
 impl fmt::Display for HangeulError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
+        match self {
             HangeulError::JamoNotFound => write!(f, "HangeulError: Jamo not found"),
             HangeulError::NotASyllable => write!(f, "HangeulError: Not a correct Hangeul syllable"),
             HangeulError::Uncomposable => write!(f, "HangeulError: Uncomposable"),
@@ -22,7 +22,7 @@ impl fmt::Display for HangeulError {
 
 impl error::Error for HangeulError {
     fn description(&self) -> &str {
-        match *self {
+        match self {
             HangeulError::JamoNotFound => "HangeulError: Jamo not found",
             HangeulError::NotASyllable => "HangeulError: Not a correct Hangeul syllable",
             HangeulError::Uncomposable => "HangeulError: Uncomposable",
@@ -30,8 +30,6 @@ impl error::Error for HangeulError {
     }
 
     fn cause(&self) -> Option<&dyn error::Error> {
-        match *self {
-            _ => None
-        }
+        None
     }
 }
