@@ -21,6 +21,33 @@ fn check_decompose_char() {
     assert_eq!(Ok(('ㅎ', 'ㅏ', None)), decompose_char(&'하'));
 }
 
+fn check_roundtrip_char(ch: char) {
+    let decomposed = decompose_char(&ch).expect("decompose_char");
+    let composed =
+        compose_char(&decomposed.0, &decomposed.1, decomposed.2.as_ref()).expect("compose_char");
+    assert_eq!(ch, composed);
+}
+
+#[test]
+fn check_roundtrip() {
+    use hangeul::constants::*;
+
+    for choseong in CHOSEONG_START..=CHOSEONG_END {
+        let choseong = std::char::from_u32(choseong).unwrap();
+        for jungseong in JUNGSEONG_START..=JUNGSEONG_END {
+            let jungseong = std::char::from_u32(jungseong).unwrap();
+            let composed = compose_char(&choseong, &jungseong, None).unwrap();
+            check_roundtrip_char(composed);
+
+            for jongseong in JONGSEONG_START..=JONGSEONG_END {
+                let jongseong = models::Jongseong::from_u32(jongseong).unwrap().to_char();
+                let composed = compose_char(&choseong, &jungseong, Some(&jongseong)).unwrap();
+                check_roundtrip_char(composed);
+            }
+        }
+    }
+}
+
 #[test]
 fn check_jamo() {
     assert_eq!(is_jamo('\u{1100}' as u32), true);

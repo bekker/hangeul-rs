@@ -65,7 +65,7 @@ impl Choseong {
             0x110B | 0x3147 => Some(Choseong::Ieung),
             0x110C | 0x3148 => Some(Choseong::Jieut),
             0x110D | 0x3149 => Some(Choseong::SsangJieut),
-            0x110E | 0x313A => Some(Choseong::Chieut),
+            0x110E | 0x314A => Some(Choseong::Chieut),
             0x110F | 0x314B => Some(Choseong::Kiyeok),
             0x1110 | 0x314C => Some(Choseong::Tieut),
             0x1111 | 0x314D => Some(Choseong::Pieup),
