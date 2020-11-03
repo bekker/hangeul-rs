@@ -3,8 +3,8 @@ pub mod errors;
 pub mod models;
 
 use crate::constants::*;
-use crate::models::*;
 use crate::errors::*;
+use crate::models::*;
 
 /// Check if the u32 is a finished/composed Hangeul syllable.
 /// Returns true for the `0xAC00` to `0xD7A3` range.
@@ -124,7 +124,7 @@ pub fn to_hangeul_u32(c: &char) -> Result<u32> {
 pub fn get_choseong(c: &char) -> Result<char> {
     match Choseong::from_char(c) {
         Some(cho) => Ok(cho.to_char()),
-        None => Err(HangeulError::JamoNotFound)
+        None => Err(HangeulError::JamoNotFound),
     }
 }
 /// Alias for get_choseong.
@@ -144,7 +144,7 @@ pub use self::get_choseong as get_lead;
 pub fn get_jungseong(c: &char) -> Result<char> {
     match Jungseong::from_char(c) {
         Some(jung) => Ok(jung.to_char()),
-        None => Err(HangeulError::JamoNotFound)
+        None => Err(HangeulError::JamoNotFound),
     }
 }
 /// Alias for get_jungseong.
@@ -164,7 +164,7 @@ pub use self::get_jungseong as get_middle;
 pub fn get_jongseong(c: &char) -> Result<char> {
     match Jongseong::from_char(c) {
         Some(jong) => Ok(jong.to_char()),
-        None => Err(HangeulError::JamoNotFound)
+        None => Err(HangeulError::JamoNotFound),
     }
 }
 /// Alias for get_jongseong.
@@ -263,10 +263,7 @@ type Decomposed = (char, char, Option<char>);
 /// assert_eq!(decomposed, decompose(dae_han));
 /// ```
 pub fn decompose(content: &str) -> Vec<Result<Decomposed>> {
-    content
-        .chars()
-        .map(|c| decompose_char(&c))
-        .collect()
+    content.chars().map(|c| decompose_char(&c)).collect()
 }
 
 /// Attempts to decompose a char. Errors if the first and second glyphs
@@ -288,13 +285,8 @@ pub fn decompose_char(c: &char) -> Result<Decomposed> {
         None => None,
     };
 
-    Ok((
-        choseong,
-        jungseong,
-        jongseong
-    ))
+    Ok((choseong, jungseong, jongseong))
 }
-
 
 /// Attempts to compose a Hangeul character (in the `Hangeul Syllable` unicode range,
 /// `AC00`–`D7A3`). See [Hangeul Syllables](https://en.wikipedia.org/wiki/Hangul_Syllables).
@@ -311,26 +303,23 @@ pub fn decompose_char(c: &char) -> Result<Decomposed> {
 pub fn compose_char(choseong: &char, jungseong: &char, jongseong: Option<&char>) -> Result<char> {
     let cho_code = match Choseong::from_char(choseong) {
         Some(cho) => cho.composable_u32(),
-        None => return Err(HangeulError::Uncomposable)
+        None => return Err(HangeulError::Uncomposable),
     };
 
     let jung_code = match Jungseong::from_char(jungseong) {
         Some(jung) => jung.composable_u32(),
-        None => return Err(HangeulError::Uncomposable)
+        None => return Err(HangeulError::Uncomposable),
     };
 
     let jong_code = match jongseong {
-        Some(c) => {
-            match Jongseong::from_char(c) {
-                Some(jong) => jong.composable_u32(),
-                None => 0,
-            }
+        Some(c) => match Jongseong::from_char(c) {
+            Some(jong) => jong.composable_u32(),
+            None => 0,
         },
-        None => 0
+        None => 0,
     };
 
     let code = cho_code + jung_code + jong_code + HANGEUL_OFFSET;
 
-    std::char::from_u32(code)
-        .ok_or_else(|| HangeulError::Uncomposable)
+    std::char::from_u32(code).ok_or_else(|| HangeulError::Uncomposable)
 }

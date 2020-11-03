@@ -5,10 +5,10 @@ use hangeul::*;
 fn check_decompose() {
     assert_eq!(
         vec![
-            Ok(('ㄷ','ㅐ', None)),
-            Ok(('ㅎ','ㅏ', Some('ㄴ'))),
+            Ok(('ㄷ', 'ㅐ', None)),
+            Ok(('ㅎ', 'ㅏ', Some('ㄴ'))),
             Ok(('ㅁ', 'ㅣ', Some('ㄴ'))),
-            Ok(('ㄱ','ㅜ', Some('ㄱ'))),
+            Ok(('ㄱ', 'ㅜ', Some('ㄱ'))),
         ],
         decompose("대한민국")
     );
@@ -16,15 +16,9 @@ fn check_decompose() {
 
 #[test]
 fn check_decompose_char() {
-    assert_eq!(
-        Ok(('ㅎ','ㅏ', Some('ㄴ'))),
-        decompose_char(&'한')
-    );
+    assert_eq!(Ok(('ㅎ', 'ㅏ', Some('ㄴ'))), decompose_char(&'한'));
 
-    assert_eq!(
-        Ok(('ㅎ','ㅏ', None)),
-        decompose_char(&'하')
-    );
+    assert_eq!(Ok(('ㅎ', 'ㅏ', None)), decompose_char(&'하'));
 }
 
 #[test]
