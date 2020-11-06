@@ -8,7 +8,7 @@ fn main() {
     // particle: 이 follows consonants, and 가 follows vowels.
     let post_position = match hangeul::ends_in_consonant(subject).unwrap() {
         true => "이",
-        false => "가"
+        false => "가",
     };
 
     // -> A wild pikachu has appeared!
@@ -17,9 +17,10 @@ fn main() {
 
     // get_lead is an alias of get_choseong, to get the first character
     // of a Hangeul syllable.
-    let sentence_in_choseong = sentence.chars()
-                                .map(|c| hangeul::get_lead(&c).unwrap_or(c))
-                                .collect::<String>();
+    let sentence_in_choseong = sentence
+        .chars()
+        .map(|c| hangeul::get_lead(&c).unwrap_or(c))
+        .collect::<String>();
 
     println!("{}", sentence_in_choseong); // ㅇㅅㅇ ㅍㅋㅊㄱ ㄴㅌㄴㄷ!
 }

@@ -5,10 +5,10 @@ use hangeul::*;
 fn check_decompose() {
     assert_eq!(
         vec![
-            Ok(('ㄷ','ㅐ', None)),
-            Ok(('ㅎ','ㅏ', Some('ㄴ'))),
+            Ok(('ㄷ', 'ㅐ', None)),
+            Ok(('ㅎ', 'ㅏ', Some('ㄴ'))),
             Ok(('ㅁ', 'ㅣ', Some('ㄴ'))),
-            Ok(('ㄱ','ㅜ', Some('ㄱ'))),
+            Ok(('ㄱ', 'ㅜ', Some('ㄱ'))),
         ],
         decompose("대한민국")
     );
@@ -16,15 +16,36 @@ fn check_decompose() {
 
 #[test]
 fn check_decompose_char() {
-    assert_eq!(
-        Ok(('ㅎ','ㅏ', Some('ㄴ'))),
-        decompose_char(&'한')
-    );
+    assert_eq!(Ok(('ㅎ', 'ㅏ', Some('ㄴ'))), decompose_char(&'한'));
 
-    assert_eq!(
-        Ok(('ㅎ','ㅏ', None)),
-        decompose_char(&'하')
-    );
+    assert_eq!(Ok(('ㅎ', 'ㅏ', None)), decompose_char(&'하'));
+}
+
+fn check_roundtrip_char(ch: char) {
+    let decomposed = decompose_char(&ch).expect("decompose_char");
+    let composed =
+        compose_char(&decomposed.0, &decomposed.1, decomposed.2.as_ref()).expect("compose_char");
+    assert_eq!(ch, composed);
+}
+
+#[test]
+fn check_roundtrip() {
+    use hangeul::constants::*;
+
+    for choseong in CHOSEONG_START..=CHOSEONG_END {
+        let choseong = std::char::from_u32(choseong).unwrap();
+        for jungseong in JUNGSEONG_START..=JUNGSEONG_END {
+            let jungseong = std::char::from_u32(jungseong).unwrap();
+            let composed = compose_char(&choseong, &jungseong, None).unwrap();
+            check_roundtrip_char(composed);
+
+            for jongseong in JONGSEONG_START..=JONGSEONG_END {
+                let jongseong = models::Jongseong::from_u32(jongseong).unwrap().to_char();
+                let composed = compose_char(&choseong, &jungseong, Some(&jongseong)).unwrap();
+                check_roundtrip_char(composed);
+            }
+        }
+    }
 }
 
 #[test]

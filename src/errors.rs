@@ -1,5 +1,5 @@
-use std::{fmt, result};
 use std::error;
+use std::{fmt, result};
 
 pub type Result<T> = result::Result<T, HangeulError>;
 
