@@ -10,7 +10,7 @@ Only modern, composable Korean unicode blocks are supported (`AC00`–`D7AF`, `1
 
 ```toml
 [dependencies]
-hangeul = "0.2.0"
+hangeul = "0.3.0"
 ```
 
 ## Usage
